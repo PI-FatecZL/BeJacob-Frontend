@@ -32,7 +32,7 @@ export default function Hero() {
                             <a href="#servicos" className="btn btn-warning btn-lg text-uppercase fs-6 fw-semibold px-4 py-3 text-primary">
                                 Conheça nossos serviços
                             </a>
-                            <a href="#agendar" className="btn btn-outline-light btn-lg text-uppercase fs-6 fw-semibold px-4 py-3">
+                            <a href="#contato" className="btn btn-outline-light btn-lg text-uppercase fs-6 fw-semibold px-4 py-3">
                                 Agendar horário
                             </a>
                         </div>
