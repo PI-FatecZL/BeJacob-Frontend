@@ -10,35 +10,48 @@ export default function LandingPage() {
             title: "Micropigmentação Labial",
             description:
                 "Técnicas avançadas para devolver simetria, cor natural e harmonia aos lábios.",
-            link: "#"
+            link: "#",
+            image: "/galeria/img-galeria4.jpg"
         },
         {
             id: 2,
             title: "Micropigmentação de Sobrancelhas",
             description:
                 "Realce o formato das sobrancelhas com técnicas personalizadas e naturais.",
-            link: "#"
+            link: "#",
+            image: "/galeria/img-galeria3.jpg"
         },
         {
             id: 3,
             title: "Design de Sobrancelhas",
             description:
                 "Design personalizado para valorizar a simetria e a harmonia do rosto.",
-            link: "#"
+            link: "#",
+            image: "/galeria/img-galeria2.jpg"
         },
         {
             id: 4,
             title: "Lash Lifting",
             description:
                 "Realce os cílios naturais proporcionando curvatura e definição.",
-            link: "#"
+            link: "#",
+            image: "/galeria/img-galeria1.jpg"
         },
         {
             id: 5,
             title: "Henna",
             description:
                 "Técnica para preencher e definir as sobrancelhas de maneira natural.",
-            link: "#"
+            link: "#",
+            image: "/galeria/img-galeria2.jpg"
+        },
+        {
+            id: 6,
+            title: "Extensão de cílios",
+            description:
+                "Técnica para preencher e definir os cílios de maneira natural.",
+            link: "#",
+            image: "/galeria/img-galeria3.jpg"
         }
     ];
 
@@ -75,7 +88,7 @@ export default function LandingPage() {
     return (
         <>
             <Hero />
-            <section id="sobre" className="container mt-5">
+            <section id="sobre" className="container mb-5 py-5 mt-5">
                 <div className="row align-items-center mb-4">
                     <div className="col-12 col-md-6">
                         <p className="small text-uppercase mb-2 fw-semibold ls-2">Sobre o Espaço</p>
@@ -87,7 +100,9 @@ export default function LandingPage() {
                             e a alta tecnologia em estética não invasiva se encontram para transformar o seu momento de autocuidado em algo único.</p>
                     </div>
                     <div className="col-12 col-md-6">
-                        <img src="https://placehold.co/600x400" className="rounded-4" alt="" />
+                        <div className="ratio ratio-4x3">
+                            <img src="https://images.unsplash.com/photo-1589710751893-f9a6770ad71b?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" className="rounded-4 img-fluid w-100 object-fit-cover overflow-hidden shadow-lg" alt="" />
+                        </div>
                     </div>
                 </div>
                 <div className="row align-items-center">
@@ -101,7 +116,9 @@ export default function LandingPage() {
                             humanizado e o compromisso inegociável de traduzir a sua identidade e autoestima em um olhar marcante.</p>
                     </div>
                     <div className="col-12 col-md-6">
-                        <img src="https://placehold.co/600x400" className="rounded-4 img-fluid" alt="" />
+                        <div className="ratio ratio-4x3">
+                            <img src="/galeria/perfil.jpg" className="rounded-4 img-fluid w-100 object-fit-cover overflow-hidden shadow-lg" alt="" />
+                        </div>
                     </div>
                 </div>
             </section>
@@ -148,6 +165,7 @@ export default function LandingPage() {
                                                     title={service.title}
                                                     description={service.description}
                                                     link={service.link}
+                                                    image={service.image}
                                                 />
 
                                             </div>
@@ -247,6 +265,35 @@ export default function LandingPage() {
                     </div>
                 </div>
 
+            </section>
+
+            <section id="contato" className="container mb-5 py-5 mt-5">
+                <div className="row align-items-center">
+                    <div className="col-12 col-md-6">
+                        <p className="small text-uppercase mb-2 fw-semibold ls-2">Contato</p>
+                        <h1 className="cormorant-garamond-font display-4">Agende um serviço</h1>
+                        <p className="text-justify">
+                            Vivencie o equilíbrio perfeito entre sofisticação, bem-estar e exclusividade.
+                            Nossa atmosfera minimalista e acolhedora foi planejada para oferecer um atendimento sob medida,
+                            onde cada detalhe prioriza o seu conforto e o seu ritmo. Venha desfrutar de técnicas modernas
+                            e transforme a sua rotina de autocuidado em um ritual inesquecível.
+                        </p>
+                        <button className="btn btn-warning w-100 py-2 fw-semibold text-uppercase">Solicitar Agendamento</button>
+                    </div>
+                    <div className="col-12 col-md-6">
+                        <div className="ratio ratio-4x3 overflow-hidden rounded-4 shadow-sm mt-4 mt-md-0">
+                            <iframe
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3657.5614242943857!2d-46.40461832478901!3d-23.548271661111233!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94ce65aa1f78acbf%3A0x5e06356e9022cc71!2sR.%20Torre%20da%20Lapela%2C%20267%20-%20Jardim%20Soares%2C%20S%C3%A3o%20Paulo%20-%20SP%2C%2008460-210!5e0!3m2!1spt-BR!2sbr!4v1788640414293!5m2!1spt-BR!2sbr"
+                                width="100%"
+                                height="100%"
+                                style={{ border: 0 }}
+                                loading="lazy"
+                                referrerPolicy="no-referrer-when-downgrade"
+                                title="Localização do Studio no Google Maps"
+                            ></iframe>
+                        </div>
+                    </div>
+                </div>
             </section>
 
             <Footer />

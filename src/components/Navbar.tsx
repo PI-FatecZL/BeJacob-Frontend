@@ -37,7 +37,7 @@ export default function Navbar() {
                 </div>
 
                 <div className="d-none d-lg-block">
-                    <a href="#agendar" className="btn btn-outline-warning text-uppercase fs-7 fw-semibold px-3 py-2">
+                    <a href="#contato" className="btn btn-outline-warning text-uppercase fs-7 fw-semibold px-3 py-2">
                         Agendar
                     </a>
                 </div>
