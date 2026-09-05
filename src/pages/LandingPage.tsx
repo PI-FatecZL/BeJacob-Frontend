@@ -105,6 +105,7 @@ export default function LandingPage() {
                     </div>
                 </div>
             </section>
+
             <section id="servicos" className="mt-5 bg-success py-5">
                 <div className="container text-center mb-3">
                     <div className="d-flex align-items-center justify-content-center gap-3 text-white">
@@ -181,6 +182,71 @@ export default function LandingPage() {
 
                     </div>
                 </div>
+            </section>
+
+            <section id="galeria" className="mt-5 py-5">
+                <div className="container text-center mb-3">
+                    <div className="d-flex align-items-center justify-content-center gap-3">
+                        <div className="border-bottom border-dark border-opacity-75 flex-grow-1" style={{ maxWidth: '120px' }}></div>
+                        <p className="text-uppercase fs-7 fw-semibold m-0 text-nowrap" style={{ letterSpacing: '2px' }}>
+                            Galeria
+                        </p>
+                        <div className="border-bottom border-dark border-opacity-75 flex-grow-1" style={{ maxWidth: '120px' }}></div>
+                    </div>
+                    <h2 className="cormorant-garamond-font display-4 text-uppercase mb-3">Nossos Clientes</h2>
+                    <p className="">Resultados reais, cuidadosamente registrados para mostrar a beleza natural que revelamos em cada atendimento.</p>
+                </div>
+                <div className="container">
+                    <div className="row g-4 text-start align-items-center">
+
+                        <div className="col-md-6">
+                            <div id="carrosselEsquerdo" className="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="20000">
+                                <div className="carousel-inner ratio ratio-4x3 overflow-hidden rounded-4 shadow-sm">
+                                    <div className="carousel-item active">
+                                        <img src="/galeria/img-galeria1.jpg" alt="Resultado Labial 1" className="d-block w-100 h-100 object-fit-cover" />
+                                    </div>
+                                    <div className="carousel-item">
+                                        <img src="/galeria/img-galeria2.jpg" alt="Resultado Labial 2" className="d-block w-100 h-100 object-fit-cover" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="col-md-6">
+                            <div className="row g-4">
+
+                                <div className="col-12">
+                                    <div id="carrosselDireitoSuperior" className="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="20000">
+                                        <div className="carousel-inner ratio ratio-21x9 overflow-hidden rounded-4 shadow-sm">
+                                            <div className="carousel-item active">
+                                                <img src="/galeria/img-galeria3.jpg" alt="Sobrancelhas 1" className="d-block w-100 h-100 object-fit-cover" />
+                                            </div>
+                                            <div className="carousel-item">
+                                                <img src="/galeria/img-galeria4.jpg" alt="Sobrancelhas 2" className="d-block w-100 h-100 object-fit-cover" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="col-12">
+                                    <div id="carrosselDireitoInferior" className="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="20000">
+                                        <div className="carousel-inner ratio ratio-21x9 overflow-hidden rounded-4 shadow-sm">
+                                            <div className="carousel-item active">
+                                                <img src="/galeria/img-galeria2.jpg" alt="Estética Facial 1" className="d-block w-100 h-100 object-fit-cover" />
+                                            </div>
+                                            <div className="carousel-item">
+                                                <img src="/galeria/img-galeria1.jpg" alt="Estética Facial 2" className="d-block w-100 h-100 object-fit-cover" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
             </section>
 
             <Footer />
