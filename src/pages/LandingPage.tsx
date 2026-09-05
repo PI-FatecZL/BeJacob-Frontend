@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Hero from "../components/Hero";
 import ServiceCard from "../components/ServiceCard";
+import Footer from "../components/Footer";
 
 export default function LandingPage() {
     const services = [
@@ -76,7 +77,7 @@ export default function LandingPage() {
             <Hero />
             <section id="sobre" className="container mt-5">
                 <div className="row align-items-center mb-4">
-                    <div className="col-6">
+                    <div className="col-12 col-md-6">
                         <p className="small text-uppercase mb-2 fw-semibold ls-2">Sobre o Espaço</p>
                         <h1 className="cormorant-garamond-font display-4">Conheça o Be Jacob Beauty Studio</h1>
                         <p className="text-justify">Localizado em um cenário singular que une a sofisticação do design contemporâneo ao calor da alma brasileira,
@@ -85,12 +86,12 @@ export default function LandingPage() {
                             personalizado. Cada detalhe do ambiente foi pensado para oferecer uma experiência relaxante, onde a biossegurança
                             e a alta tecnologia em estética não invasiva se encontram para transformar o seu momento de autocuidado em algo único.</p>
                     </div>
-                    <div className="col-6">
+                    <div className="col-12 col-md-6">
                         <img src="https://placehold.co/600x400" className="rounded-4" alt="" />
                     </div>
                 </div>
                 <div className="row align-items-center">
-                    <div className="col-6">
+                    <div className="col-12 col-md-6">
                         <p className="small text-uppercase mb-2 fw-semibold ls-2">Sobre a Profissional</p>
                         <h1 className="cormorant-garamond-font display-4">Prazer, Beatriz Jacob</h1>
                         <p className="text-justify">Há mais de 6 anos, dedico a minha vida à estética não invasiva e ao realce da beleza natural. Para mim,
@@ -99,7 +100,7 @@ export default function LandingPage() {
                             Lash Lifting, Brow Lamination e Extensão de Cílios. Minha filosofia de trabalho prioriza a flexibilidade, o atendimento
                             humanizado e o compromisso inegociável de traduzir a sua identidade e autoestima em um olhar marcante.</p>
                     </div>
-                    <div className="col-6">
+                    <div className="col-12 col-md-6">
                         <img src="https://placehold.co/600x400" className="rounded-4 img-fluid" alt="" />
                     </div>
                 </div>
@@ -181,6 +182,8 @@ export default function LandingPage() {
                     </div>
                 </div>
             </section>
+
+            <Footer />
         </>
     );
 }
