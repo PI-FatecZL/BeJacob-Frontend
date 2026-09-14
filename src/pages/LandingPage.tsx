@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import Hero from "../components/Hero";
-import ServiceCard from "../components/ServiceCard";
-import Footer from "../components/Footer";
+import Hero from "../components/landingPage/Hero";
+import ServiceCard from "../components/landingPage/ServiceCard";
+import Footer from "../components/landingPage/Footer";
 
 export default function LandingPage() {
     const services = [
