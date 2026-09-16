@@ -38,7 +38,7 @@ export default function Register() {
                 password: senha,
                 phone: telefoneApenasNumeros
             });
-            navigate("/dashboard")
+            navigate("/")
         } catch (error) {
             console.error(error);
             setErro("Os dados inseridos estão inválidos. Tente novamente.");
