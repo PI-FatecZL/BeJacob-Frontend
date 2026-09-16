@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Hero from "../components/landingPage/Hero";
 import ServiceCard from "../components/landingPage/ServiceCard";
 import Footer from "../components/landingPage/Footer";
+import { useNavigate } from "react-router-dom";
 
 export default function LandingPage() {
     const services = [
@@ -84,6 +85,8 @@ export default function LandingPage() {
             services.slice(i, i + servicesPerSlide)
         );
     }
+
+    const navigate = useNavigate();
 
     return (
         <>
@@ -278,7 +281,7 @@ export default function LandingPage() {
                             onde cada detalhe prioriza o seu conforto e o seu ritmo. Venha desfrutar de técnicas modernas
                             e transforme a sua rotina de autocuidado em um ritual inesquecível.
                         </p>
-                        <button className="btn btn-warning w-100 py-2 fw-semibold text-uppercase">Solicitar Agendamento</button>
+                        <button onClick={() => navigate("/solicitar-agendamento")} className="btn btn-warning w-100 py-2 fw-semibold text-uppercase">Solicitar Agendamento</button>
                     </div>
                     <div className="col-12 col-md-6">
                         <div className="ratio ratio-4x3 overflow-hidden rounded-4 shadow-sm mt-4 mt-md-0">
