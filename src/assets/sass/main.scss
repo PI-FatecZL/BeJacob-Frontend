@@ -31,16 +31,10 @@ $letter-spacing: (
 @import '../../../node_modules/bootstrap/scss/mixins';
 @import '../../../node_modules/bootstrap/scss/utilities';
 
-$utilities: map-merge(
-  $utilities,
-  (
-    "letter-spacing": (
-      property: letter-spacing,
-      class: ls, 
-      values: $letter-spacing
-    )
-  )
-);
+$utilities: map-merge($utilities,
+    ("letter-spacing": (property: letter-spacing,
+        class: ls,
+        values: $letter-spacing )));
 
 // cormorant garamond
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&display=swap');
@@ -89,9 +83,23 @@ body {
 }
 
 @keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(5px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(5px);
+  }
 }
+
 .animate-bounce {
   animation: bounce 2s infinite;
+}
+
+// customização do estado de foco dos inputs do sistema
+.input-custom-focus:focus {
+  border-color: #4F694F !important;
+  outline: 0 !important;
 }

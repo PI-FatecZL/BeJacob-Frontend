@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import LandingPage from '../pages/LandingPage';
+import Login from '../pages/auth/Login';
 
 export default function AppRoutes() {
     return (
@@ -8,6 +9,13 @@ export default function AppRoutes() {
                 path={"/"}
                 element={
                     <LandingPage />
+                }
+            />
+
+            <Route 
+                path={"/login"}
+                element={
+                    <Login />
                 }
             />
         </Routes>
