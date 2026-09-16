@@ -17,7 +17,7 @@ export default function Navbar() {
     };
 
     return (
-        <nav className="navbar navbar-dark navbar-expand-lg pt-4">
+        <nav className="navbar navbar-dark navbar-expand-lg py-3 bg-primary">
             <div className="container">
 
                 <Link className="navbar-brand cormorant-garamond-font fst-italic fs-3" to="/">
@@ -39,23 +39,23 @@ export default function Navbar() {
                 <div className="collapse navbar-collapse justify-content-center" id="navbarNav">
                     <ul className="navbar-nav mb-3 mb-lg-0">
                         <li className="nav-item me-2">
-                            <a className="nav-link" href="#sobre">Sobre</a>
+                            <Link className="nav-link" to="/#sobre">Sobre</Link>
                         </li>
                         <li className="nav-item me-2">
-                            <a className="nav-link" href="#servicos">Serviços</a>
+                            <Link className="nav-link" to="/#servicos">Serviços</Link>
                         </li>
                         <li className="nav-item me-2">
-                            <a className="nav-link" href="#galeria">Galeria</a>
+                            <Link className="nav-link" to="/#servicos">Serviços</Link>
                         </li>
                         <li className="nav-item">
-                            <a className="nav-link" href="#contato">Contato</a>
+                            <Link className="nav-link" to="/#contato">Contato</Link>
                         </li>
                     </ul>
 
                     {/* Botão Mobile */}
                     <div className="d-lg-none mt-3">
-                        <button 
-                            onClick={handleAcaoBotao} 
+                        <button
+                            onClick={handleAcaoBotao}
                             className="btn btn-outline-warning text-uppercase fs-7 fw-semibold w-100 py-2"
                         >
                             {estaAutenticado ? "Minha Conta" : "Agendar"}
@@ -65,8 +65,8 @@ export default function Navbar() {
 
                 {/* Botão Desktop */}
                 <div className="d-none d-lg-block">
-                    <button 
-                        onClick={handleAcaoBotao} 
+                    <button
+                        onClick={handleAcaoBotao}
                         className="btn btn-outline-warning text-uppercase fs-7 fw-semibold px-3 py-2"
                     >
                         {estaAutenticado ? "Minha Conta" : "Agendar"}
