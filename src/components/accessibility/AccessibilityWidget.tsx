@@ -12,14 +12,23 @@ export const AccessibilityWidget: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [rate, setRate] = useState<number>(1.0);
 
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 992);
+
     useEffect(() => {
         const handleRouteChange = () => {
             stop();
         };
 
+        const handleResize = () => setIsMobile(window.innerWidth < 992);
+
+        // Ouvintes de eventos
         window.addEventListener('popstate', handleRouteChange);
+        window.addEventListener('resize', handleResize);
+
+        // Limpeza dos eventos ao desmontar o componente
         return () => {
             window.removeEventListener('popstate', handleRouteChange);
+            window.removeEventListener('resize', handleResize);
         };
     }, [stop]);
 
@@ -32,7 +41,14 @@ export const AccessibilityWidget: React.FC = () => {
     };
 
     return (
-        <div className="no-read position-fixed bottom-0 end-0 p-4" style={{ zIndex: 9999 }}>
+        /* CORREÇÃO: Removido 'bottom-0' das classes e injetado o 'bottom' dinamicamente usando a state 'isMobile' */
+        <div
+            className="no-read position-fixed end-0 p-4"
+            style={{
+                zIndex: 9999,
+                bottom: isMobile ? '65px' : '0px'
+            }}
+        >
             {isOpen && (
                 <div
                     className="card shadow-lg mb-3 p-3 position-absolute bottom-100 end-0"
