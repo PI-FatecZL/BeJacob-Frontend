@@ -5,6 +5,8 @@ import Register from '../pages/auth/Register';
 import PrivateRoute from './PrivateRoute';
 import SolicitarAgendamento from '../pages/SolicitarAgendamento';
 import MinhaConta from '../pages/MinhaConta';
+import Dashboard from '../pages/admin/Dashboard';
+import NotFound from '../pages/NotFound';
 
 export default function AppRoutes() {
     return (
@@ -45,6 +47,22 @@ export default function AppRoutes() {
                     <PrivateRoute>
                         <MinhaConta />
                     </PrivateRoute>
+                }
+            />
+
+            <Route
+                path={"/admin/dashboard"}
+                element={
+                    <PrivateRoute>
+                        <Dashboard />
+                    </PrivateRoute>
+                }
+            />
+
+            <Route 
+                path={"*"}
+                element={
+                    <NotFound />
                 }
             />
         </Routes>
