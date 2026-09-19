@@ -82,6 +82,15 @@ body {
   background-repeat: no-repeat;
 }
 
+.auth-banner-bg {
+  position: relative;
+  min-height: 100vh;
+  background: url('/hero-image.png') no-repeat center center;
+  background-size: cover;
+  background-blend-mode: overlay;
+  background-color: rgba(0, 0, 0, 0.300); 
+}
+
 @keyframes bounce {
 
   0%,

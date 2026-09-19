@@ -1,6 +1,6 @@
 export default function AuthBanner() {
-    return(
-        <div className="col-md-6 d-none d-md-flex bg-primary text-white justify-content-center align-items-center">
+    return (
+        <div className="col-md-6 d-none d-md-flex auth-banner-bg text-white justify-content-center align-items-center p-4">
             <div className="text-center">
                 <h1 className="display-4 fw-bold">
                     Be Jacob Beauty Studio
