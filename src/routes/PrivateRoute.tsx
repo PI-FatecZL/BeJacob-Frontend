@@ -4,9 +4,20 @@ import type { ReactNode } from "react";
 
 interface PrivateRouteProps {
   children: ReactNode;
+  requiredRole?: string;
 }
 
-export default function PrivateRoute({ children }: PrivateRouteProps) {
+export default function PrivateRoute({ children, requiredRole }: PrivateRouteProps) {
   const authenticated = authService.isAuthenticated();
-  return authenticated ? <>{children}</> : <Navigate to="/login" replace />;
+  const userRole = authService.getUserRole();
+
+  if (!authenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (requiredRole && userRole !== requiredRole) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <>{children}</>;
 }
