@@ -1,53 +1,33 @@
-import type { Service, ServiceRequest } from '../types/service';
-
-let services: Service[] = [
-    {
-        id: 1,
-        nome: 'Design de Sobrancelha',
-        descricao: 'Modelagem e definição das sobrancelhas',
-        preco: 45,
-        duracaoMinutos: 30,
-    },
-    {
-        id: 2,
-        nome: 'Limpeza de Pele',
-        descricao: 'Limpeza facial completa',
-        preco: 120,
-        duracaoMinutos: 60,
-    },
-];
+import { api } from "../api/api";
+import type { ServiceRequest, ServiceResponse } from "../types/service";
 
 export const serviceService = {
-    async findAll(): Promise<Service[]> {
-        return [...services];
+    // adicionar serviço
+    create: async (dados: ServiceRequest): Promise<ServiceResponse> => {
+        const response = await api.post<ServiceResponse>('/services', dados);
+        return response.data;
     },
 
-    async create(data: ServiceRequest): Promise<Service> {
-        const newService: Service = {
-            id: Date.now(),
-            ...data,
-        };
-
-        services.push(newService);
-        return newService;
+    // buscar todos os serviços
+    findAll: async (): Promise<ServiceResponse[]> => {
+        const response = await api.get<ServiceResponse[]>('/services');
+        return response.data;
     },
 
-    async update(id: number, data: ServiceRequest): Promise<Service> {
-        const index = services.findIndex((service) => service.id === id);
-
-        if (index === -1) {
-            throw new Error('Serviço não encontrado');
-        }
-
-        services[index] = {
-            ...services[index],
-            ...data,
-        };
-
-        return services[index];
+    // buscar serviço por id
+    findById: async (id: number): Promise<ServiceResponse> => {
+        const response = await api.get<ServiceResponse>(`/services/${id}`);
+        return response.data;
     },
 
-    async remove(id: number): Promise<void> {
-        services = services.filter((service) => service.id !== id);
+    // atualizar serviço
+    update: async (id: number, dados: Partial<ServiceRequest>): Promise<ServiceResponse> => {
+        const response = await api.patch<ServiceResponse>(`/services/${id}`, dados);
+        return response.data;
     },
+
+    // excluir serviço
+    delete: async (id: number): Promise<void> => {
+        await api.delete(`/services/${id}`);
+    }
 };

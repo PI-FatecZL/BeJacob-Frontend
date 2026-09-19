@@ -7,6 +7,7 @@ import SolicitarAgendamento from '../pages/SolicitarAgendamento';
 import MinhaConta from '../pages/MinhaConta';
 import Dashboard from '../pages/admin/Dashboard';
 import NotFound from '../pages/NotFound';
+import Servicos from '../pages/admin/servicos/Servicos';
 
 export default function AppRoutes() {
     return (
@@ -55,6 +56,15 @@ export default function AppRoutes() {
                 element={
                     <PrivateRoute requiredRole="ADMIN">
                         <Dashboard />
+                    </PrivateRoute>
+                }
+            />
+
+            <Route
+                path={"/admin/servicos"}
+                element={
+                    <PrivateRoute requiredRole="ADMIN">
+                        <Servicos />
                     </PrivateRoute>
                 }
             />
