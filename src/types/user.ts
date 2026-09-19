@@ -24,6 +24,7 @@ export interface DataToken {
     tokenJWT: string;
     id: number;
     email: string;
+    role: string;
 }
 
 export interface UserResponse {

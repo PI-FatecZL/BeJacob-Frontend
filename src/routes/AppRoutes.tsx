@@ -53,7 +53,7 @@ export default function AppRoutes() {
             <Route
                 path={"/admin/dashboard"}
                 element={
-                    <PrivateRoute>
+                    <PrivateRoute requiredRole="ADMIN">
                         <Dashboard />
                     </PrivateRoute>
                 }
