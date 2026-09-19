@@ -1,27 +1,79 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "../components/landingPage/Navbar";
 import Footer from "../components/landingPage/Footer";
 import { authService } from "../services/authService";
 import { useNavigate } from "react-router-dom";
+import { userService } from "../services/userService";
+import type { UserResponse } from "../types/user";
 
 export default function MinhaConta() {
     const navigate = useNavigate();
 
-    const [usuario] = useState({
-        nome: "Usuário",
-        email: "usuario@email.com",
-        telefone: "(11) 99999-9999"
-    });
+    const [usuario, setUsuario] = useState<UserResponse | null>(null);
+    const [carregando, setCarregando] = useState<boolean>(true);
+
+    useEffect(() => {
+        async function carregarUsuario() {
+            try {
+                setCarregando(true);
+                const userId = authService.getUserId();
+
+                if (!userId) {
+                    navigate("/");
+                    return;
+                }
+
+                const dadosUsuario = await userService.findById(userId);
+                setUsuario(dadosUsuario);
+            } catch (error) {
+                console.error("Erro ao buscar usuário:", error);
+            } finally {
+                setCarregando(false);
+            }
+        }
+
+        carregarUsuario();
+    }, [navigate]);
 
     const handleLogout = () => {
         authService.logout();
         navigate("/");
+    };
+
+    // 1. CORREÇÃO DE ESTRUTURA PARA TELA DE CARREGAMENTO
+    if (carregando) {
+        return (
+            <div className="d-flex flex-column min-vh-100">
+                <Navbar />
+                <div className="container py-5 text-center flex-grow-1 d-flex flex-column justify-content-center align-items-center">
+                    <div className="spinner-border text-warning" role="status">
+                        <span className="visually-hidden">Carregando...</span>
+                    </div>
+                    <p className="mt-2 text-muted">Carregando seus dados...</p>
+                </div>
+                <Footer />
+            </div>
+        );
     }
 
+    // 2. CORREÇÃO DE ESTRUTURA PARA TELA DE ERRO
+    if (!usuario) {
+        return (
+            <div className="d-flex flex-column min-vh-100">
+                <Navbar />
+                <div className="container py-5 text-center flex-grow-1 d-flex flex-column justify-content-center align-items-center">
+                    <p className="text-danger">Não foi possível carregar as informações do usuário.</p>
+                </div>
+                <Footer />
+            </div>
+        );
+    }
+
+    // 3. CORREÇÃO DE ESTRUTURA PARA TELA PRINCIPAL
     return (
-        <>
+        <div className="d-flex flex-column min-vh-100">
             <Navbar />
-            <div className="container py-5">
+            <div className="container py-5 flex-grow-1">
                 <h1 className="cormorant-garamond-font mb-4">Minha Conta</h1>
 
                 <div className="row g-4">
@@ -29,19 +81,12 @@ export default function MinhaConta() {
                         <div className="card shadow-sm border-0 rounded-4 text-center p-4">
                             <div className="position-relative mx-auto mb-3" style={{ width: "120px", height: "120px" }}>
                                 <img
-                                    src="/perfil.png"
+                                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(usuario.name)}&background=4F694F&color=fff&bold=true&size=128`}
                                     alt="Foto de perfil"
-                                    className="rounded-circle img-fluid w-100 h-100 object-fit-cover"
+                                    className="rounded-circle img-fluid w-100 h-100 object-fit-cover shadow-sm"
                                 />
-                                <button
-                                    type="button"
-                                    className="btn btn-warning position-absolute bottom-0 end-0 rounded-circle p-0 d-flex align-items-center justify-content-center shadow-sm"
-                                    style={{ width: "36px", height: "36px" }}
-                                >
-                                    <i className="bi bi-camera-fill fs-6"></i>
-                                </button>
                             </div>
-                            <h5 className="fw-semibold mb-1">{usuario.nome}</h5>
+                            <h5 className="fw-semibold mb-1">{usuario.name}</h5>
                             <p className="text-muted small mb-3">{usuario.email}</p>
                             <button onClick={handleLogout} className="btn btn-outline-danger btn-sm w-100">
                                 Sair da Conta
@@ -49,19 +94,17 @@ export default function MinhaConta() {
                         </div>
                     </div>
 
-                    {/* Informações Pessoais e Histórico */}
                     <div className="col-md-8">
-                        {/* Dados Cadastrais */}
                         <div className="card shadow-sm border-0 rounded-4 p-4 mb-4">
                             <h5 className="card-title mb-3 fw-bold">Informações Pessoais</h5>
                             <div className="row g-3">
                                 <div className="col-sm-6">
                                     <label className="form-label text-muted small">Nome Completo</label>
-                                    <input type="text" className="form-control" value={usuario.nome} readOnly />
+                                    <input type="text" className="form-control" value={usuario.name} readOnly />
                                 </div>
                                 <div className="col-sm-6">
                                     <label className="form-label text-muted small">Telefone</label>
-                                    <input type="text" className="form-control" value={usuario.telefone} readOnly />
+                                    <input type="text" className="form-control" value={usuario.phone} readOnly />
                                 </div>
                                 <div className="col-12">
                                     <label className="form-label text-muted small">E-mail</label>
@@ -70,7 +113,6 @@ export default function MinhaConta() {
                             </div>
                         </div>
 
-                        {/* Agendamentos */}
                         <div className="card shadow-sm border-0 rounded-4 p-4">
                             <h5 className="card-title mb-3 fw-bold">Meus Agendamentos</h5>
                             <div className="list-group list-group-flush">
@@ -89,6 +131,6 @@ export default function MinhaConta() {
                 </div>
             </div>
             <Footer />
-        </>
+        </div>
     );
 }

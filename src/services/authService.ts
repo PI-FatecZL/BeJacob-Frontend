@@ -7,6 +7,7 @@ export const authService = {
 
         if (response.data && response.data.tokenJWT) {
             localStorage.setItem("token", response.data.tokenJWT);
+            localStorage.setItem("id", response.data.id.toString());
         }
 
         return response.data;
@@ -27,10 +28,16 @@ export const authService = {
 
     logout(): void {
         localStorage.removeItem("token");
+        localStorage.removeItem("id");
     },
 
     getToken(): string | null {
         return localStorage.getItem("token");
+    },
+
+    getUserId(): number | null {
+        const id = localStorage.getItem("id");
+        return id ? Number(id) : null;
     },
 
     isAuthenticated(): boolean {
