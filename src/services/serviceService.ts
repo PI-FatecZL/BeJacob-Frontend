@@ -1,49 +1,53 @@
 import type { Service, ServiceRequest } from '../types/service';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5173';
-
-function getAuthHeaders(): HeadersInit {
-    const token = localStorage.getItem('token'); 
-    return {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    };
-}
+let services: Service[] = [
+    {
+        id: 1,
+        nome: 'Design de Sobrancelha',
+        descricao: 'Modelagem e definição das sobrancelhas',
+        preco: 45,
+        duracaoMinutos: 30,
+    },
+    {
+        id: 2,
+        nome: 'Limpeza de Pele',
+        descricao: 'Limpeza facial completa',
+        preco: 120,
+        duracaoMinutos: 60,
+    },
+];
 
 export const serviceService = {
     async findAll(): Promise<Service[]> {
-        const res = await fetch(`${API_URL}/services`, {
-            headers: getAuthHeaders(),
-        });
-        if (!res.ok) throw new Error('Erro ao buscar serviços');
-        return res.json();
+        return [...services];
     },
 
     async create(data: ServiceRequest): Promise<Service> {
-        const res = await fetch(`${API_URL}/services`, {
-            method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(data),
-        });
-        if (!res.ok) throw new Error('Erro ao criar serviço');
-        return res.json();
+        const newService: Service = {
+            id: Date.now(),
+            ...data,
+        };
+
+        services.push(newService);
+        return newService;
     },
 
     async update(id: number, data: ServiceRequest): Promise<Service> {
-        const res = await fetch(`${API_URL}/services/${id}`, {
-            method: 'PATCH',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(data),
-        });
-        if (!res.ok) throw new Error('Erro ao atualizar serviço');
-        return res.json();
+        const index = services.findIndex((service) => service.id === id);
+
+        if (index === -1) {
+            throw new Error('Serviço não encontrado');
+        }
+
+        services[index] = {
+            ...services[index],
+            ...data,
+        };
+
+        return services[index];
     },
 
     async remove(id: number): Promise<void> {
-        const res = await fetch(`${API_URL}/services/${id}`, {
-            method: 'DELETE',
-            headers: getAuthHeaders(),
-        });
-        if (!res.ok) throw new Error('Erro ao excluir serviço');
+        services = services.filter((service) => service.id !== id);
     },
 };

@@ -6,5 +6,4 @@ export interface Service {
     duracaoMinutos: number;
 }
 
-// Ajuste esses campos para bater exatamente com o ServiceRequest do backend
 export type ServiceRequest = Omit<Service, 'id'>;

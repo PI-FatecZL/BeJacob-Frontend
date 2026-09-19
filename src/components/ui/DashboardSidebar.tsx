@@ -1,17 +1,32 @@
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { authService } from '../../services/authService';
 
-export default function DashboardSidebar() {
+type ActivePanel = 'none' | 'servicos';
+
+interface DashboardSidebarProps {
+    activePanel: ActivePanel;
+    onServicosClick: () => void;
+}
+
+export default function DashboardSidebar({ activePanel, onServicosClick }: DashboardSidebarProps) {
     const location = useLocation();
     const navigate = useNavigate();
-
     const handleLogout = () => {
         authService.logout();
         navigate("/login");
     }
 
+    // Rotas de verdade (Geral, Agendamentos, Clientes): só destaca se o painel de Serviços não estiver aberto por cima.
     const getLinkClass = (path: string) => {
-        if (location.pathname === path) {
+        if (activePanel === 'none' && location.pathname === path) {
+            return "bg-white text-primary fw-bold";
+        }
+        return "text-white opacity-75 opacity-100-hover";
+    };
+
+    // Botão Serviços: destaca em branco quando é o painel ativo.
+    const getServicosClass = () => {
+        if (activePanel === 'servicos') {
             return "bg-white text-primary fw-bold";
         }
         return "text-white opacity-75 opacity-100-hover";
@@ -28,12 +43,10 @@ export default function DashboardSidebar() {
                     <span className="fs-4 fw-bold">Be Jacob Beauty Studio</span>
                     <span className="small">Sistema Administrativo</span>
                 </Link>
-
                 <hr />
-
                 <ul className="nav nav-pills flex-column mb-auto">
                     <li className="nav-item">
-                        <Link to="/admin/dashboard" className={`nav-link text-start px-3 py-2 ${getLinkClass('/admin/dashboard')}`} aria-current={location.pathname === '/admin/dashboard' ? 'page' : undefined}>
+                        <Link to="/admin/dashboard" className={`nav-link text-start px-3 py-2 ${getLinkClass('/admin/dashboard')}`} aria-current={activePanel === 'none' && location.pathname === '/admin/dashboard' ? 'page' : undefined}>
                             <i className="bi bi-speedometer2 me-2"></i>
                             Geral
                         </Link>
@@ -45,10 +58,14 @@ export default function DashboardSidebar() {
                         </Link>
                     </li>
                     <li>
-                        <Link to="/admin/servicos" className={`nav-link text-start px-3 py-2 ${getLinkClass('/admin/servicos')}`}>
+                        <button
+                            type="button"
+                            onClick={onServicosClick}
+                            className={`nav-link text-start px-3 py-2 w-100 bg-transparent border-0 ${getServicosClass()}`}
+                        >
                             <i className="bi bi-grid me-2"></i>
                             Serviços
-                        </Link>
+                        </button>
                     </li>
                     <li>
                         <Link to="/admin/clientes" className={`nav-link text-start px-3 py-2 ${getLinkClass('/admin/clientes')}`}>
@@ -57,9 +74,7 @@ export default function DashboardSidebar() {
                         </Link>
                     </li>
                 </ul>
-
                 <hr />
-
                 <div className="dropdown">
                     <a
                         href="#/"
@@ -85,7 +100,6 @@ export default function DashboardSidebar() {
                     </ul>
                 </div>
             </div>
-
             {/* sidebar mobile */}
             <nav
                 className="d-lg-none fixed-bottom bg-primary border-top border-opacity-10 border-white shadow-lg"
@@ -100,7 +114,6 @@ export default function DashboardSidebar() {
                     >
                         <i className="bi bi-speedometer2 fs-3"></i>
                     </Link>
-
                     <Link
                         to="/admin/agendamentos"
                         className={`nav-link text-center p-2 rounded-3 ${getLinkClass('/admin/agendamentos')}`}
@@ -109,16 +122,15 @@ export default function DashboardSidebar() {
                     >
                         <i className="bi bi-table fs-3"></i>
                     </Link>
-
-                    <Link
-                        to="/admin/servicos"
-                        className={`nav-link text-center p-2 rounded-3 ${getLinkClass('/admin/servicos')}`}
+                    <button
+                        type="button"
+                        onClick={onServicosClick}
                         title="Serviços"
+                        className={`nav-link text-center p-2 rounded-3 bg-transparent border-0 ${getServicosClass()}`}
                         style={{ width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                     >
                         <i className="bi bi-grid fs-3"></i>
-                    </Link>
-
+                    </button>
                     <Link
                         to="/admin/clientes"
                         className={`nav-link text-center p-2 rounded-3 ${getLinkClass('/admin/clientes')}`}
@@ -127,7 +139,6 @@ export default function DashboardSidebar() {
                     >
                         <i className="bi bi-people fs-3"></i>
                     </Link>
-
                     <div className="dropup">
                         <a
                             href="#/"
