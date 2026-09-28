@@ -1,9 +1,16 @@
-export interface Service {
-    id: number;
-    nome: string;
-    descricao: string;
-    preco: number;
-    duracaoMinutos: number;
+export interface ServiceRequest {
+    name: string;
+    description: string;
+    durationMinutes: number;
+    price: number;
+    active: boolean;
 }
 
-export type ServiceRequest = Omit<Service, 'id'>;
+export interface ServiceResponse {
+    id: number;
+    name: string;
+    description: string;
+    durationMinutes: number;
+    price: number;
+    active: boolean;
+}

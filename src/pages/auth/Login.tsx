@@ -24,7 +24,7 @@ export default function Login() {
                 email: email, 
                 password: senha
             });
-            navigate("/")
+            navigate("/admin/dashboard");
         } catch (error) {
             console.error(error);
             setErro("E-mail ou senha inválidos. Tente novamente.");

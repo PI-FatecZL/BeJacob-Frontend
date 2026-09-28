@@ -31,7 +31,7 @@ export default function Input({
 
     return (
         <div className={margin}>
-            {label && <label className="mb-1 form-label fw-medium text-secondary">{label}</label>}
+            {label && <label className="mb-1 form-label fw-medium text-primary">{label}</label>}
             <input
                 type={type}
                 className={`form-control ${sizeClass} border-1 shadow-sm input-custom-focus`.trim()}

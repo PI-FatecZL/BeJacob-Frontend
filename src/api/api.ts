@@ -1,6 +1,7 @@
 import axios from "axios";
+import { authService } from "../services/authService";
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5173';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 // configurando endpoint padrão do backend
 export const api = axios.create({
@@ -25,4 +26,18 @@ api.interceptors.request.use(
     (error) => {
         return Promise.reject(error);
     }
+);
+
+// Interceptor para tratar o erro de token expirado (401)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 403) {
+      authService.logout();
+
+      window.location.href = "/login"; 
+    }
+
+    return Promise.reject(error);
+  }
 );
