@@ -8,6 +8,7 @@ import MinhaConta from '../pages/MinhaConta';
 import Dashboard from '../pages/admin/Dashboard';
 import NotFound from '../pages/NotFound';
 import Servicos from '../pages/admin/servicos/Servicos';
+import Clientes from '../pages/admin/clientes/Clientes';
 
 export default function AppRoutes() {
     return (
@@ -65,6 +66,15 @@ export default function AppRoutes() {
                 element={
                     <PrivateRoute requiredRole="ADMIN">
                         <Servicos />
+                    </PrivateRoute>
+                }
+            />
+
+            <Route
+                path={"/admin/clientes"}
+                element={
+                    <PrivateRoute requiredRole="ADMIN">
+                        <Clientes />
                     </PrivateRoute>
                 }
             />
