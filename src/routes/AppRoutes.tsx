@@ -9,6 +9,7 @@ import Dashboard from '../pages/admin/Dashboard';
 import NotFound from '../pages/NotFound';
 import Servicos from '../pages/admin/servicos/Servicos';
 import Clientes from '../pages/admin/clientes/Clientes';
+import Agendamentos from '../pages/admin/agendamentos/Agendamentos';
 
 export default function AppRoutes() {
     return (
@@ -75,6 +76,15 @@ export default function AppRoutes() {
                 element={
                     <PrivateRoute requiredRole="ADMIN">
                         <Clientes />
+                    </PrivateRoute>
+                }
+            />
+
+            <Route
+                path={"/admin/agendamentos"}
+                element={
+                    <PrivateRoute requiredRole="ADMIN">
+                        <Agendamentos />
                     </PrivateRoute>
                 }
             />
