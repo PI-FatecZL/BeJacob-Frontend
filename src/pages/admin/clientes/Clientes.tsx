@@ -3,7 +3,7 @@ import DashboardLayout from "../../../components/layout/DashboardLayout";
 
 import ModalConfirmacao from '../../../components/ui/ModalConfirmacao';
 import type { UserResponse } from '../../../types/user';
-import type { SpringPage } from '../../../types/pagination'; 
+import type { SpringPage } from '../../../types/pagination';
 import { userService } from '../../../services/userService';
 
 export default function Clientes() {
@@ -37,6 +37,10 @@ export default function Clientes() {
 
     // função para filtrar usuário
     const filteredUsers = usersList.filter((u) => {
+        const loggedUserId = localStorage.getItem('id');
+        if (loggedUserId && String(u.id) === String(loggedUserId)) {
+            return false;
+        }
         const term = search.trim().toLowerCase();
         if (!term) return true;
         return u.name.toLowerCase().includes(term);
@@ -48,7 +52,7 @@ export default function Clientes() {
         setError(null);
         try {
             await userService.delete(selectedUser.id);
-            loadUsers(); 
+            loadUsers();
         } catch {
             setError('Não foi possível excluir o usuário.');
         }
@@ -135,8 +139,8 @@ export default function Clientes() {
                                 <nav>
                                     <ul className="pagination pagination-sm m-0">
                                         <li className={`page-item ${pageData?.first ? 'disabled' : ''}`}>
-                                            <button 
-                                                className="page-item page-link" 
+                                            <button
+                                                className="page-item page-link"
                                                 onClick={() => setCurrentPage(prev => prev - 1)}
                                                 disabled={pageData?.first}
                                             >
@@ -149,8 +153,8 @@ export default function Clientes() {
                                             </span>
                                         </li>
                                         <li className={`page-item ${pageData?.last ? 'disabled' : ''}`}>
-                                            <button 
-                                                className="page-item page-link" 
+                                            <button
+                                                className="page-item page-link"
                                                 onClick={() => setCurrentPage(prev => prev + 1)}
                                                 disabled={pageData?.last}
                                             >
