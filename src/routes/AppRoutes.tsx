@@ -10,6 +10,7 @@ import NotFound from '../pages/NotFound';
 import Servicos from '../pages/admin/servicos/Servicos';
 import Clientes from '../pages/admin/clientes/Clientes';
 import Agendamentos from '../pages/admin/agendamentos/Agendamentos';
+import NovoAgendamento from '../pages/admin/agendamentos/NovoAgendamento';
 
 export default function AppRoutes() {
     return (
@@ -85,6 +86,15 @@ export default function AppRoutes() {
                 element={
                     <PrivateRoute requiredRole="ADMIN">
                         <Agendamentos />
+                    </PrivateRoute>
+                }
+            />
+
+            <Route
+                path={"/admin/agendamentos/novo"}
+                element={
+                    <PrivateRoute requiredRole="ADMIN">
+                        <NovoAgendamento />
                     </PrivateRoute>
                 }
             />

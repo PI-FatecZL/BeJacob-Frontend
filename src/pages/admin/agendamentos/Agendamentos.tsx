@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import DashboardLayout from "../../../components/layout/DashboardLayout";
 
 import ModalConfirmacao from '../../../components/ui/ModalConfirmacao';
-import type { AppointmentResponse } from '../../../types/appointment'; 
+import type { AppointmentResponse } from '../../../types/appointment';
 import type { SpringPage } from '../../../types/pagination';
 import { appointmentService } from '../../../services/appointmentService';
+import { useNavigate } from 'react-router-dom';
 
 export default function Agendamentos() {
     const [pageData, setPageData] = useState<SpringPage<AppointmentResponse> | null>(null);
@@ -14,6 +15,8 @@ export default function Agendamentos() {
     const [search, setSearch] = useState('');
 
     const [selectedAppointment, setSelectedAppointment] = useState<AppointmentResponse | null>(null);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         loadAppointments();
@@ -84,6 +87,13 @@ export default function Agendamentos() {
                         <i className="bi bi-calendar-event me-2"></i>
                         Agendamentos
                     </h5>
+                    <button
+                        className="btn btn-light btn-sm fw-semibold"
+                        onClick={() => navigate('/admin/agendamentos/novo')}
+                    >
+                        <i className="bi bi-plus-lg me-1"></i>
+                        Novo Agendamento
+                    </button>
                 </div>
 
                 <div className="p-3">
