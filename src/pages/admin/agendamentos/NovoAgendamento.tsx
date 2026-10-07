@@ -157,7 +157,7 @@ export default function NovoAgendamento() {
                                     </select>
                                 </div>
 
-                                <div className="col-12">
+                                <div className="col-12 col-md-6">
                                     <label className="form-label fw-medium">Serviço <span className="text-danger">*</span></label>
                                     <select
                                         className="form-select"
@@ -174,7 +174,7 @@ export default function NovoAgendamento() {
                                     </select>
                                 </div>
 
-                                <div className="col-12">
+                                <div className="col-12 col-md-6">
                                     <label className="form-label fw-medium">Data do Atendimento <span className="text-danger">*</span></label>
                                     <input
                                         type="date"
