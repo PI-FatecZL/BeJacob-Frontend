@@ -4,6 +4,9 @@ import DashboardLayout from "../../../components/layout/DashboardLayout";
 import { appointmentService } from '../../../services/appointmentService';
 import { userService } from '../../../services/userService';
 import { serviceService } from '../../../services/serviceService';
+import Select from '../../../components/form/Select';
+import Input from '../../../components/form/Input';
+import TextArea from '../../../components/form/TextArea';
 
 interface OptionItem {
     id: number;
@@ -16,6 +19,16 @@ export default function NovoAgendamento() {
     const [users, setUsers] = useState<OptionItem[]>([]);
     const [services, setServices] = useState<OptionItem[]>([]);
     const [availableTimes, setAvailableTimes] = useState<string[]>([]);
+
+    const serviceOptions = services.map((s) => ({
+        label: s.name,
+        value: s.id
+    }));
+
+    const userOptions = users.map((u) => ({
+        label: u.name,
+        value: u.id
+    }));
 
     const [loadingOptions, setLoadingOptions] = useState(true);
     const [loadingTimes, setLoadingTimes] = useState(false);
@@ -63,7 +76,7 @@ export default function NovoAgendamento() {
 
     const loadAvailableTimes = async (date: string, serviceId: number) => {
         setLoadingTimes(true);
-        setSelectedTime(''); 
+        setSelectedTime('');
         try {
             const times = await appointmentService.getAvailableTimes(date, serviceId);
             setAvailableTimes(times);
@@ -113,7 +126,7 @@ export default function NovoAgendamento() {
 
     return (
         <DashboardLayout>
-            <div className="bg-white rounded-3 shadow-sm maxWidth-container">
+            <div className="bg-white rounded-3 shadow-sm mb-5">
                 <div className="bg-primary text-white d-flex align-items-center justify-content-between p-3 rounded-top-3">
                     <h5 className="m-0 d-flex align-items-center gap-2">
                         <i className="bi bi-calendar-plus"></i>
@@ -141,53 +154,40 @@ export default function NovoAgendamento() {
                         <form onSubmit={handleSubmit}>
                             <div className="row g-3">
                                 <div className="col-12">
-                                    <label className="form-label fw-medium">Cliente <span className="text-danger">*</span></label>
-                                    <select
-                                        className="form-select"
+                                    <Select
+                                        label="Cliente"
                                         required
                                         value={selectedUserId}
-                                        onChange={(e) => setSelectedUserId(e.target.value ? Number(e.target.value) : '')}
-                                    >
-                                        <option value="">Selecione um cliente...</option>
-                                        {users.map((u) => (
-                                            <option key={u.id} value={u.id}>
-                                                {u.name}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        onChange={(e) => setSelectedUserId(e.target.value ? Number(e.target.value) : "")}
+                                        placeholder="Selecione um cliente..."
+                                        options={userOptions}
+                                    />
                                 </div>
 
                                 <div className="col-12 col-md-6">
-                                    <label className="form-label fw-medium">Serviço <span className="text-danger">*</span></label>
-                                    <select
-                                        className="form-select"
+                                    <Select
+                                        label="Serviço"
                                         required
                                         value={selectedServiceId}
-                                        onChange={(e) => setSelectedServiceId(e.target.value ? Number(e.target.value) : '')}
-                                    >
-                                        <option value="">Selecione um serviço...</option>
-                                        {services.map((s) => (
-                                            <option key={s.id} value={s.id}>
-                                                {s.name}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        onChange={(e) => setSelectedServiceId(e.target.value ? Number(e.target.value) : "")}
+                                        placeholder="Selecione um serviço..."
+                                        options={serviceOptions}
+                                    />
                                 </div>
 
                                 <div className="col-12 col-md-6">
-                                    <label className="form-label fw-medium">Data do Atendimento <span className="text-danger">*</span></label>
-                                    <input
+                                    <Input
+                                        label="Data do Atendimento"
                                         type="date"
-                                        className="form-control"
-                                        required
                                         value={selectedDate}
                                         onChange={(e) => setSelectedDate(e.target.value)}
+                                        required
                                     />
                                 </div>
 
                                 <div className="col-12">
-                                    <label className="form-label fw-medium d-block">
-                                        Horário Disponíveis <span className="text-danger">*</span>
+                                    <label className="form-label text-primary fw-medium d-block">
+                                        Horários Disponíveis
                                     </label>
 
                                     {!selectedServiceId || !selectedDate ? (
@@ -232,14 +232,13 @@ export default function NovoAgendamento() {
                                 </div>
 
                                 <div className="col-12">
-                                    <label className="form-label fw-medium">Observações</label>
-                                    <textarea
-                                        className="form-control"
+                                    <TextArea 
+                                        label="Observações do atendimento (opcional)"
                                         rows={3}
                                         placeholder="Preferências do cliente, observações, etc."
                                         value={notes}
                                         onChange={(e) => setNotes(e.target.value)}
-                                    />
+                                    />  
                                 </div>
 
                                 <div className="col-12 d-flex justify-content-end gap-2 mt-4 pt-3 border-top">

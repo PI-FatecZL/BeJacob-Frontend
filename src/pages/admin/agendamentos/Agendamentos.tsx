@@ -86,13 +86,13 @@ export default function Agendamentos() {
                     <h5 className="m-0">
                         <i className="bi bi-calendar-event me-2"></i>
                         Agendamentos
-                    </h5>
+                    </h5>   
                     <button
-                        className="btn btn-light btn-sm fw-semibold"
+                        className="btn btn-outline-light"
                         onClick={() => navigate('/admin/agendamentos/novo')}
                     >
-                        <i className="bi bi-plus-lg me-1"></i>
-                        Novo Agendamento
+                        <i className="bi bi-plus-circle me-2"></i>
+                        Novo agendamento
                     </button>
                 </div>
 
