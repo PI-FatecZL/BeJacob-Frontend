@@ -17,7 +17,7 @@ interface Agendamento {
     data: string;
     horario: string; 
     observacao: string;
-    status: "Pendente" | "Confirmado";
+    status: "Pendente" | "Confirmado"; 
 }
 
 // Dado mokado

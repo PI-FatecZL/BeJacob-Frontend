@@ -7,7 +7,7 @@ import FormAgendamento, {
 interface Props {
     nomeUsuario: string;
     servicos: ServicoOpcao[];
-    horariosOcupados?: (data: string) => string[];
+    horariosOcupados?: (data: string) => string[]; 
     onSalvar: (dados: DadosAgendamento) => void;
     onFechar: () => void;
 }

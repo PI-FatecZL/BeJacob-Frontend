@@ -13,7 +13,7 @@ export interface DadosAgendamento {
     servico: string;
     data: string; 
     horario: string; 
-    observacao: string;
+    observacao: string; 
 }
 
 interface Props {
