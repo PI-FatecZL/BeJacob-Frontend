@@ -18,10 +18,10 @@ export interface CreateAppointmentAdminRequest {
 }
 
 export interface UpdateAppointmentRequest {
-    serviceId: number;
-    startsAt: string;
-    notes: string;
-    status: AppointmentStatus;
+    serviceId?: number;
+    startsAt?: string;
+    notes?: string;
+    status?: AppointmentStatus;
 }
 
 export interface AppointmentResponse {

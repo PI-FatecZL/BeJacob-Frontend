@@ -11,6 +11,7 @@ import Servicos from '../pages/admin/servicos/Servicos';
 import Clientes from '../pages/admin/clientes/Clientes';
 import Agendamentos from '../pages/admin/agendamentos/Agendamentos';
 import NovoAgendamento from '../pages/admin/agendamentos/NovoAgendamento';
+import EditarAgendamento from '../pages/admin/agendamentos/EditarAgendamento';
 
 export default function AppRoutes() {
     return (
@@ -100,6 +101,15 @@ export default function AppRoutes() {
             />
 
             <Route 
+                path={"/admin/agendamentos/editar/:id" }
+                element={
+                    <PrivateRoute requiredRole="ADMIN">
+                        <EditarAgendamento />
+                    </PrivateRoute>
+                } 
+            />
+
+            <Route
                 path={"*"}
                 element={
                     <NotFound />

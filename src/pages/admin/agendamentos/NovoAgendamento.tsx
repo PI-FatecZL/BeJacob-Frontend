@@ -8,6 +8,7 @@ import Select from '../../../components/form/Select';
 import Input from '../../../components/form/Input';
 import TextArea from '../../../components/form/TextArea';
 
+// interface genérica para determinar itens em um select 
 interface OptionItem {
     id: number;
     name: string;
@@ -54,6 +55,7 @@ export default function NovoAgendamento() {
         }
     }, [selectedServiceId, selectedDate]);
 
+    // carregar dados nos selects
     const loadInitialData = async () => {
         setLoadingOptions(true);
         try {
@@ -74,6 +76,7 @@ export default function NovoAgendamento() {
         }
     };
 
+    // carregar horários disponíveis para o agendamento
     const loadAvailableTimes = async (date: string, serviceId: number) => {
         setLoadingTimes(true);
         setSelectedTime('');
@@ -88,11 +91,13 @@ export default function NovoAgendamento() {
         }
     };
 
+    // função para formatar horários disponíveis no padrão HH:mm
     const formatTimeDisplay = (timeString: string) => {
         if (!timeString) return '';
         return timeString.substring(0, 5);
     };
 
+    // função para cadastrar o agendamento como administrador
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -124,6 +129,15 @@ export default function NovoAgendamento() {
         }
     };
 
+    // função para buscar a data de hoje e restringir datas anteriores
+    const getTodayDateString = () => {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
     return (
         <DashboardLayout>
             <div className="bg-white rounded-3 shadow-sm mb-5">
@@ -148,7 +162,7 @@ export default function NovoAgendamento() {
                     {loadingOptions ? (
                         <div className="text-center py-5">
                             <div className="spinner-border text-primary" role="status" />
-                            <p className="text-muted small mt-2">Carregando formulário...</p>
+                            <p className="text-muted small mt-2">Carregando informações...</p>
                         </div>
                     ) : (
                         <form onSubmit={handleSubmit}>
@@ -181,6 +195,7 @@ export default function NovoAgendamento() {
                                         type="date"
                                         value={selectedDate}
                                         onChange={(e) => setSelectedDate(e.target.value)}
+                                        min={getTodayDateString()}
                                         required
                                     />
                                 </div>
@@ -232,13 +247,13 @@ export default function NovoAgendamento() {
                                 </div>
 
                                 <div className="col-12">
-                                    <TextArea 
+                                    <TextArea
                                         label="Observações do atendimento (opcional)"
                                         rows={3}
                                         placeholder="Preferências do cliente, observações, etc."
                                         value={notes}
                                         onChange={(e) => setNotes(e.target.value)}
-                                    />  
+                                    />
                                 </div>
 
                                 <div className="col-12 d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
@@ -248,7 +263,7 @@ export default function NovoAgendamento() {
                                         onClick={() => navigate('/admin/agendamentos')}
                                         disabled={submitting}
                                     >
-                                        Cancelar
+                                        Voltar
                                     </button>
                                     <button
                                         type="submit"
@@ -258,7 +273,7 @@ export default function NovoAgendamento() {
                                         {submitting ? (
                                             <>
                                                 <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                                Salvando...
+                                                Confirmando...
                                             </>
                                         ) : (
                                             'Confirmar Agendamento'

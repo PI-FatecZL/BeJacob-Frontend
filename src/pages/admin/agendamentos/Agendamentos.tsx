@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import DashboardLayout from "../../../components/layout/DashboardLayout";
 
 import ModalConfirmacao from '../../../components/ui/ModalConfirmacao';
-import type { AppointmentResponse } from '../../../types/appointment';
+import ResumoAgendamento from './ResumoAgendamento';
+import type { AppointmentResponse, UpdateAppointmentRequest } from '../../../types/appointment';
 import type { SpringPage } from '../../../types/pagination';
 import { appointmentService } from '../../../services/appointmentService';
 import { useNavigate } from 'react-router-dom';
+import Select from '../../../components/form/Select';
 
 export default function Agendamentos() {
     const [pageData, setPageData] = useState<SpringPage<AppointmentResponse> | null>(null);
@@ -13,6 +15,9 @@ export default function Agendamentos() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [search, setSearch] = useState('');
+
+    const [statusFilter, setStatusFilter] = useState<string>('ALL');
+    const [periodFilter, setPeriodFilter] = useState<string>('ALL');
 
     const [selectedAppointment, setSelectedAppointment] = useState<AppointmentResponse | null>(null);
 
@@ -37,39 +42,75 @@ export default function Agendamentos() {
 
     const appointmentsList = pageData?.content || [];
 
-    // filtrar agendamentos pelo nome do cliente ou nome do serviço
+    // função para filtrar agendamentos
     const filteredAppointments = appointmentsList.filter((appt) => {
+        // filtro por cliente ou serviço
         const term = search.trim().toLowerCase();
-        if (!term) return true;
-
         const clientName = appt.user?.name?.toLowerCase() || '';
         const serviceName = appt.service?.name?.toLowerCase() || '';
+        const matchesSearch = !term || clientName.includes(term) || serviceName.includes(term);
 
-        return clientName.includes(term) || serviceName.includes(term);
+        // filtro por status
+        const matchesStatus = statusFilter === 'ALL' || appt.status === statusFilter;
+
+        // filtro por periodo
+        let matchesPeriod = true;
+        if (periodFilter !== 'ALL' && appt.startsAt) {
+            const apptDate = new Date(appt.startsAt);
+            const today = new Date();
+
+            today.setHours(0, 0, 0, 0);
+            const apptDateOnly = new Date(apptDate.getFullYear(), apptDate.getMonth(), apptDate.getDate());
+
+            if (periodFilter === 'TODAY') {
+                matchesPeriod = apptDateOnly.getTime() === today.getTime();
+            } else if (periodFilter === 'WEEK') {
+                const startOfWeek = new Date(today);
+                startOfWeek.setDate(today.getDate() - today.getDay());
+                const endOfWeek = new Date(startOfWeek);
+                endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+                matchesPeriod = apptDateOnly >= startOfWeek && apptDateOnly <= endOfWeek;
+            } else if (periodFilter === 'MONTH') {
+                matchesPeriod =
+                    apptDate.getMonth() === today.getMonth() &&
+                    apptDate.getFullYear() === today.getFullYear();
+            }
+        }
+
+        return matchesSearch && matchesStatus && matchesPeriod;
     });
 
+    // função para marcar agendamento como concluído
+    const handleCompleteAppointment = async () => {
+        if (!selectedAppointment) return;
+        setError(null);
+        try {
+            const payload: UpdateAppointmentRequest = {
+                status: 'COMPLETED',
+            };
+            await appointmentService.update(selectedAppointment.id, payload);
+            loadAppointments();
+            setSelectedAppointment(null);
+        } catch {
+            setError('Não foi possível concluir o agendamento.');
+        }
+    };
+
+    // função para cancelar agendamento
     const handleCancelAppointment = async () => {
         if (!selectedAppointment) return;
         setError(null);
         try {
             await appointmentService.cancel(selectedAppointment.id);
-            loadAppointments(); // Recarrega a lista atualizada
+            loadAppointments();
             setSelectedAppointment(null);
         } catch {
             setError('Não foi possível cancelar o agendamento.');
         }
     };
 
-    const getStatusLabel = (status: string) => {
-        switch (status) {
-            case 'SCHEDULED': return 'Agendado';
-            case 'COMPLETED': return 'Concluído';
-            case 'CANCELED': return 'Cancelado';
-            case 'NO_SHOW': return 'Não Compareceu';
-            default: return status;
-        }
-    };
-
+    // função para formatar a data para tabela geral
     const formatDateTime = (isoString: string) => {
         try {
             const date = new Date(isoString);
@@ -86,7 +127,7 @@ export default function Agendamentos() {
                     <h5 className="m-0">
                         <i className="bi bi-calendar-event me-2"></i>
                         Agendamentos
-                    </h5>   
+                    </h5>
                     <button
                         className="btn btn-outline-light"
                         onClick={() => navigate('/admin/agendamentos/novo')}
@@ -106,11 +147,43 @@ export default function Agendamentos() {
                             </span>
                             <input
                                 type="text"
-                                className="form-control"
+                                className="form-control input-custom-focus"
                                 placeholder="Buscar por cliente ou serviço..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                             />
+                        </div>
+
+                        <div className="d-flex flex-wrap gap-2">
+                            <div style={{ width: '160px' }}>
+                                <Select
+                                    size="sm"
+                                    value={statusFilter}
+                                    onChange={(e) => setStatusFilter(e.target.value)}
+                                    placeholder=""
+                                    options={[
+                                        { label: 'Todos os status', value: 'ALL' },
+                                        { label: 'Agendado', value: 'SCHEDULED' },
+                                        { label: 'Concluído', value: 'COMPLETED' },
+                                        { label: 'Cancelado', value: 'CANCELED' }
+                                    ]}
+                                />
+                            </div>
+
+                            <div style={{ width: '160px' }}>
+                                <Select
+                                    size="sm"
+                                    value={periodFilter}
+                                    onChange={(e) => setPeriodFilter(e.target.value)}
+                                    placeholder=""
+                                    options={[
+                                        { label: 'Todo o período', value: 'ALL' },
+                                        { label: 'Hoje', value: 'TODAY' },
+                                        { label: 'Esta semana', value: 'WEEK' },
+                                        { label: 'Este mês', value: 'MONTH' }
+                                    ]}
+                                />
+                            </div>
                         </div>
                     </div>
 
@@ -120,8 +193,8 @@ export default function Agendamentos() {
                         </div>
                     ) : filteredAppointments.length === 0 ? (
                         <p className="text-muted text-center py-3">
-                            {search
-                                ? 'Nenhum agendamento encontrado para essa busca.'
+                            {search || statusFilter !== 'ALL' || periodFilter !== 'ALL'
+                                ? 'Nenhum agendamento encontrado para esses filtros.'
                                 : 'Nenhum agendamento cadastrado.'}
                         </p>
                     ) : (
@@ -133,8 +206,6 @@ export default function Agendamentos() {
                                             <th>Cliente</th>
                                             <th>Serviço</th>
                                             <th>Data / Hora</th>
-                                            <th>Status</th>
-                                            <th>Notas</th>
                                             <th className="text-end">Ações</th>
                                         </tr>
                                     </thead>
@@ -142,31 +213,57 @@ export default function Agendamentos() {
                                         {filteredAppointments.map((appt) => (
                                             <tr key={appt.id}>
                                                 <td>
-                                                    <div className="fw-medium">{appt.user?.name}</div>
-                                                    <div className="text-muted small">{appt.user?.phone}</div>
+                                                    <div className="fw-medium">{appt.user.name}</div>
+                                                    <div className="text-muted small">{appt.user.phone}</div>
                                                 </td>
-                                                <td>{appt.service?.name}</td>
+                                                <td>{appt.service.name}</td>
                                                 <td className="small">{formatDateTime(appt.startsAt)}</td>
-                                                <td>
-                                                    <span className="badge bg-primary">
-                                                        {getStatusLabel(appt.status)}
-                                                    </span>
-                                                </td>
-                                                <td className="text-muted small text-truncate" style={{ maxWidth: '150px' }} title={appt.notes}>
-                                                    {appt.notes || ' '}
-                                                </td>
                                                 <td className="text-end">
-                                                    {appt.status === 'SCHEDULED' && (
+                                                    <div className="d-inline-flex gap-1">
                                                         <button
-                                                            className="btn btn-sm btn-outline-danger"
+                                                            className="btn btn-sm btn-outline-info"
                                                             data-bs-toggle="modal"
-                                                            data-bs-target="#modalCancelarAgendamento"
+                                                            data-bs-target="#modalResumoAgendamento"
                                                             onClick={() => setSelectedAppointment(appt)}
-                                                            title="Cancelar Agendamento"
+                                                            title="Ver Detalhes / Resumo"
                                                         >
-                                                            <i className="bi bi-x-circle"></i>
+                                                            <i className="bi bi-eye"></i>
                                                         </button>
-                                                    )}
+
+                                                        {appt.status === 'SCHEDULED' && (
+                                                            <button
+                                                                className="btn btn-sm btn-outline-primary"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#modalConcluirAgendamento"
+                                                                onClick={() => setSelectedAppointment(appt)}
+                                                                title="Concluir Agendamento"
+                                                            >
+                                                                <i className="bi bi-check-circle"></i>
+                                                            </button>
+                                                        )}
+
+                                                        {appt.status === 'SCHEDULED' && (
+                                                            <button
+                                                                className="btn btn-sm btn-outline-warning"
+                                                                onClick={() => navigate(`/admin/agendamentos/editar/${appt.id}`)}
+                                                                title="Editar Agendamento"
+                                                            >
+                                                                <i className="bi bi-pencil"></i>
+                                                            </button>
+                                                        )}
+
+                                                        {appt.status === 'SCHEDULED' && (
+                                                            <button
+                                                                className="btn btn-sm btn-outline-danger"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#modalCancelarAgendamento"
+                                                                onClick={() => setSelectedAppointment(appt)}
+                                                                title="Cancelar Agendamento"
+                                                            >
+                                                                <i className="bi bi-x-circle"></i>
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}
@@ -211,13 +308,29 @@ export default function Agendamentos() {
                 </div>
             </div>
 
+            {/* modal para resumo do agendamento */}
+            <ResumoAgendamento
+                idModal="modalResumoAgendamento"
+                appointment={selectedAppointment}
+            />
+
+            {/* modal para confirmar a conclusão de um agendamento */}
+            <ModalConfirmacao
+                id="modalConcluirAgendamento"
+                titulo="Confirmar Conclusão"
+                descricao={`Deseja marcar o agendamento de ${selectedAppointment?.user?.name} como concluído?`}
+                tipo="success"
+                onConfirmar={handleCompleteAppointment}
+            />
+
+            {/* modal para confirmar o cancelamento de um agendamento */}
             <ModalConfirmacao
                 id="modalCancelarAgendamento"
                 titulo="Confirmar Cancelamento"
                 descricao={`Deseja realmente cancelar o agendamento do cliente ${selectedAppointment?.user?.name}?`}
+                tipo="danger"
                 onConfirmar={handleCancelAppointment}
             />
         </DashboardLayout>
     );
 }
-
