@@ -9,6 +9,9 @@ import Dashboard from '../pages/admin/Dashboard';
 import NotFound from '../pages/NotFound';
 import Servicos from '../pages/admin/servicos/Servicos';
 import Clientes from '../pages/admin/clientes/Clientes';
+import Agendamentos from '../pages/admin/agendamentos/Agendamentos';
+import NovoAgendamento from '../pages/admin/agendamentos/NovoAgendamento';
+import EditarAgendamento from '../pages/admin/agendamentos/EditarAgendamento';
 
 export default function AppRoutes() {
     return (
@@ -79,7 +82,34 @@ export default function AppRoutes() {
                 }
             />
 
+            <Route
+                path={"/admin/agendamentos"}
+                element={
+                    <PrivateRoute requiredRole="ADMIN">
+                        <Agendamentos />
+                    </PrivateRoute>
+                }
+            />
+
+            <Route
+                path={"/admin/agendamentos/novo"}
+                element={
+                    <PrivateRoute requiredRole="ADMIN">
+                        <NovoAgendamento />
+                    </PrivateRoute>
+                }
+            />
+
             <Route 
+                path={"/admin/agendamentos/editar/:id" }
+                element={
+                    <PrivateRoute requiredRole="ADMIN">
+                        <EditarAgendamento />
+                    </PrivateRoute>
+                } 
+            />
+
+            <Route
                 path={"*"}
                 element={
                     <NotFound />

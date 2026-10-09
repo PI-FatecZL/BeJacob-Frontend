@@ -3,7 +3,7 @@ import type { ServiceRequest } from '../../../types/service';
 import Modal from '../../../components/ui/Modal';
 import Input from '../../../components/form/Input';
 import TextArea from '../../../components/form/TextArea';
-import Checkbox from '../../../components/form/CheckBox';
+import Checkbox from '../../../components/form/Checkbox';
 
 interface CriarServicoProps {
     idModal: string;
@@ -80,6 +80,7 @@ export default function CriarServico({ idModal, onSave }: CriarServicoProps) {
                 <Input
                     label="Nome"
                     margin="mb-3"
+                    placeholder="Insira o nome do serviço, ex: Lash Design"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     required
@@ -88,6 +89,7 @@ export default function CriarServico({ idModal, onSave }: CriarServicoProps) {
                 <TextArea
                     label="Descrição"
                     margin="mb-3"
+                    placeholder="Insira a descrição do serviço"
                     value={form.description}
                     onChange={(e) => setForm({ ...form, description: e.target.value })}
                     rows={2}
@@ -95,7 +97,6 @@ export default function CriarServico({ idModal, onSave }: CriarServicoProps) {
 
                 <div className="row g-2 mb-3">
                     <div className="col-6">
-                        {/* Campo de Preço Formatado como Moeda */}
                         <Input
                             label="Preço (R$)"
                             type="text"
@@ -109,6 +110,7 @@ export default function CriarServico({ idModal, onSave }: CriarServicoProps) {
                         <Input
                             label="Duração (min)"
                             type="number"
+                            placeholder="60 minutos = 1 hora"
                             value={form.durationMinutes || ''}
                             onChange={(e) => setForm({ ...form, durationMinutes: Number(e.target.value) })}
                             required

@@ -8,6 +8,7 @@ interface InputProps {
     onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
     minLength?: number;
     maxLength?: number;
+    min?: string | number;
     required?: boolean;
     disabled?: boolean;
     placeholder?: string;
@@ -22,6 +23,7 @@ export default function Input({
     onChange,
     minLength,
     maxLength,
+    min,
     required = false,
     disabled = false,
     placeholder,
@@ -39,6 +41,7 @@ export default function Input({
                 onChange={onChange}
                 minLength={minLength}
                 maxLength={maxLength}
+                min={min}
                 required={required}
                 disabled={disabled}
                 placeholder={placeholder}
