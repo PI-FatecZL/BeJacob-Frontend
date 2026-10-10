@@ -89,8 +89,6 @@ export default function SolicitarAgendamento() {
         <div className="d-flex flex-column min-vh-100">
             <Navbar />
             <div className="container py-5 flex-grow-1">
-                <h1 className="cormorant-garamond-font mb-4">Solicitar Agendamento</h1>
-
                 <div className="row justify-content-center">
                     <div className="col-lg-9">
                         <div className="card shadow-sm border-0 rounded-4 overflow-hidden">

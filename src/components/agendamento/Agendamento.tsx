@@ -1,213 +1,246 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { serviceService } from "../../services/serviceService";
+import { appointmentService } from "../../services/appointmentService";
+import Select from "../form/Select";
+import Input from "../form/Input";
+import TextArea from "../form/TextArea";
 
-// Colocar dados do banco correto
-export interface ServicoOpcao {
+// interface genérica para determinar itens em um select 
+interface OptionItem {
     id: number;
-    nome: string;
-    preco: number;
-    duracaoMinutos: number; 
+    name: string;
 }
 
-export interface DadosAgendamento {
-    servicoId: number;
-    servico: string;
-    data: string; 
-    horario: string; 
-    observacao: string; 
-}
+export default function FormAgendamento() {
+    const navigate = useNavigate();
 
-interface Props {
-    nomeUsuario: string;
-    servicos: ServicoOpcao[];
-    horariosOcupados?: (data: string) => string[];
-    onSalvar: (dados: DadosAgendamento) => void;
-    onCancelar: () => void;
-}
+    const [services, setServices] = useState<OptionItem[]>([]);
+    const [availableTimes, setAvailableTimes] = useState<string[]>([]);
 
-const COR_PRIMARIA = "#4F694F";
+    const serviceOptions = services.map((s) => ({
+        label: s.name,
+        value: s.id
+    }));
 
+    const [loadingOptions, setLoadingOptions] = useState(true);
+    const [loadingTimes, setLoadingTimes] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-function gerarHorarios(): string[] {
-    const lista: string[] = [];
-    for (let h = 8; h <= 19; h++) {
-        lista.push(`${String(h).padStart(2, "0")}:00`);
-        lista.push(`${String(h).padStart(2, "0")}:30`);
-    }
-    return lista;
-}
+    const [selectedServiceId, setSelectedServiceId] = useState<number | ''>('');
+    const [selectedDate, setSelectedDate] = useState<string>('');
+    const [selectedTime, setSelectedTime] = useState<string>('');
+    const [notes, setNotes] = useState<string>('');
 
-function formatarDuracao(min: number): string {
-    if (min < 60) return `${min} min`;
-    const h = Math.floor(min / 60);
-    const m = min % 60;
-    return m === 0 ? `${h}h` : `${h}h${String(m).padStart(2, "0")}`;
-}
+    useEffect(() => {
+        loadInitialData();
+    }, []);
 
-export default function FormAgendamento({
-    nomeUsuario,
-    servicos,
-    horariosOcupados,
-    onSalvar,
-    onCancelar,
-}: Props) {
-    const [servicoId, setServicoId] = useState<string>("");
-    const [data, setData] = useState<string>("");
-    const [horario, setHorario] = useState<string>("");
-    const [observacao, setObservacao] = useState<string>("");
+    useEffect(() => {
+        if (selectedServiceId && selectedDate) {
+            loadAvailableTimes(selectedDate, Number(selectedServiceId));
+        } else {
+            setAvailableTimes([]);
+            setSelectedTime('');
+        }
+    }, [selectedServiceId, selectedDate]);
 
-    const servicoSelecionado = servicos.find((s) => String(s.id) === servicoId);
-    const horarios = useMemo(gerarHorarios, []);
-    const ocupados = data && horariosOcupados ? horariosOcupados(data) : [];
+    // carregar dados nos selects
+    const loadInitialData = async () => {
+        setLoadingOptions(true);
+        try {
+            const [servicesData] = await Promise.all([
+                serviceService.findAll()
+            ]);
 
-    const hoje = new Date();
-    const hojeStr = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}-${String(
-        hoje.getDate()
-    ).padStart(2, "0")}`;
+            const typedServices = servicesData as any;
 
-    const podeSalvar = !!servicoSelecionado && !!data && !!horario;
-
-    const handleData = (valor: string) => {
-        setData(valor);
-        setHorario("");
+            setServices(Array.isArray(typedServices) ? typedServices : typedServices?.content || []);
+        } catch {
+            setError('Erro ao carregar a lista de serviços.');
+        } finally {
+            setLoadingOptions(false);
+        }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault(); // evita recarregar a página
-        if (!servicoSelecionado || !podeSalvar) return;
-        onSalvar({
-            servicoId: servicoSelecionado.id,
-            servico: servicoSelecionado.nome,
-            data,
-            horario,
-            observacao: observacao.trim(),
-        });
+    // carregar horários disponíveis para o agendamento
+    const loadAvailableTimes = async (date: string, serviceId: number) => {
+        setLoadingTimes(true);
+        setSelectedTime('');
+        try {
+            const times = await appointmentService.getAvailableTimes(date, serviceId);
+            setAvailableTimes(times);
+        } catch {
+            setError('Erro ao buscar horários disponíveis para este dia.');
+            setAvailableTimes([]);
+        } finally {
+            setLoadingTimes(false);
+        }
+    };
+
+    // função para formatar horários disponíveis no padrão HH:mm
+    const formatTimeDisplay = (timeString: string) => {
+        if (!timeString) return '';
+        return timeString.substring(0, 5);
+    };
+
+    // função para cadastrar o agendamento como administrador
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!selectedServiceId || !selectedDate || !selectedTime) {
+            setError('Por favor, preencha todos os campos obrigatórios.');
+            return;
+        }
+
+        setSubmitting(true);
+        setError(null);
+
+        const formattedTime = selectedTime.length === 5 ? `${selectedTime}:00` : selectedTime;
+        const startsAt = `${selectedDate}T${formattedTime}`;
+
+        try {
+            await appointmentService.create({
+                serviceId: Number(selectedServiceId),
+                startsAt,
+                notes
+            });
+
+            navigate('/minha-conta');
+        } catch {
+            setError('Não foi possível realizar o agendamento. Verifique os dados e tente novamente.');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    // função para buscar a data de hoje e restringir datas anteriores
+    const getTodayDateString = () => {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            <div className="mb-3">
-                <label className="form-label fw-semibold">Cliente</label>
-                <input type="text" className="form-control" value={nomeUsuario} readOnly disabled />
-            </div>
+        <div>
+            {error && <div className="alert alert-danger py-2 mb-4">{error}</div>}
 
-            <div className="row g-3 mb-3">
-                <div className="col-md-6">
-                    <label className="form-label fw-semibold">
-                        Serviço <span className="text-danger">*</span>
-                    </label>
-                    <select
-                        className="form-select"
-                        value={servicoId}
-                        onChange={(e) => setServicoId(e.target.value)}
-                    >
-                        <option value="">Selecione um serviço</option>
-                        {servicos.map((s) => (
-                            <option key={s.id} value={s.id}>
-                                {s.nome}
-                            </option>
-                        ))}
-                    </select>
+            {loadingOptions ? (
+                <div className="text-center py-5">
+                    <div className="spinner-border text-primary" role="status" />
+                    <p className="text-muted small mt-2">Carregando informações...</p>
                 </div>
+            ) : (
+                <form onSubmit={handleSubmit}>
+                    <div className="row g-3">
+                        <div className="col-12 col-md-6">
+                            <Select
+                                label="Serviço"
+                                required
+                                value={selectedServiceId}
+                                onChange={(e) => setSelectedServiceId(e.target.value ? Number(e.target.value) : "")}
+                                placeholder="Selecione um serviço..."
+                                options={serviceOptions}
+                            />
+                        </div>
 
-                <div className="col-md-6">
-                    <label className="form-label fw-semibold">
-                        Data do Atendimento <span className="text-danger">*</span>
-                    </label>
-                    <input
-                        type="date"
-                        className="form-control"
-                        value={data}
-                        min={hojeStr}
-                        onChange={(e) => handleData(e.target.value)}
-                    />
-                </div>
-            </div>
+                        <div className="col-12 col-md-6">
+                            <Input
+                                label="Data do Atendimento"
+                                type="date"
+                                value={selectedDate}
+                                onChange={(e) => setSelectedDate(e.target.value)}
+                                min={getTodayDateString()}
+                                required
+                            />
+                        </div>
 
-            {/* mostrar preço e tempo médio */}
-            {/* só aparece depois que um serviço é escolhido */}
-            {servicoSelecionado && (
-                <div
-                    className="d-flex flex-wrap gap-4 rounded-3 px-3 py-2 mb-3"
-                    style={{ backgroundColor: "#EEF2EE" }}
-                >
-                    <span>
-                        <i className="bi bi-cash-coin me-2" style={{ color: COR_PRIMARIA }}></i>
-                        <small className="text-muted">Preço: </small>
-                        <strong>
-                            {servicoSelecionado.preco.toLocaleString("pt-BR", {
-                                style: "currency",
-                                currency: "BRL",
-                            })}
-                        </strong>
-                    </span>
-                    <span>
-                        <i className="bi bi-clock me-2" style={{ color: COR_PRIMARIA }}></i>
-                        <small className="text-muted">Tempo médio: </small>
-                        <strong>{formatarDuracao(servicoSelecionado.duracaoMinutos)}</strong>
-                    </span>
-                </div>
-            )}
+                        <div className="col-12">
+                            <label className="form-label text-primary fw-medium d-block">
+                                Horários Disponíveis
+                            </label>
 
-            {/*o horario é para aparecer só aparece depois de escolher a data */}
-            {/* O ocupado fica desabilitado e cinza; o escolhido fica verde */}
-            {data && (
-                <div className="mb-3">
-                    <label className="form-label fw-semibold">
-                        Horários Disponíveis <span className="text-danger">*</span>
-                    </label>
-                    <div className="d-flex flex-wrap gap-2">
-                        {horarios.map((h) => {
-                            const indisponivel = ocupados.includes(h);
-                            const ativo = horario === h;
-                            return (
-                                <button
-                                    key={h}
-                                    type="button" 
-                                    disabled={indisponivel}
-                                    onClick={() => setHorario(h)}
-                                    className="btn d-flex flex-column align-items-center px-3 py-2"
-                                    style={{
-                                        minWidth: "88px",
-                                        border: `1px solid ${indisponivel ? "#ced4da" : COR_PRIMARIA}`,
-                                        backgroundColor: ativo ? COR_PRIMARIA : "#fff",
-                                        color: ativo ? "#fff" : indisponivel ? "#adb5bd" : "#212529",
-                                    }}
-                                >
-                                    <span className="fw-semibold">{h}</span>
-                                    <small style={{ fontSize: "0.7rem", opacity: 0.8 }}>
-                                        {indisponivel ? "Ocupado" : "Disponível"}
-                                    </small>
-                                </button>
-                            );
-                        })}
+                            {!selectedServiceId || !selectedDate ? (
+                                <div className="alert alert-secondary py-2 mb-0 text-muted small">
+                                    <i className="bi bi-info-circle me-1"></i>
+                                    Selecione o serviço e a data primeiro para ver os horários.
+                                </div>
+                            ) : loadingTimes ? (
+                                <div className="d-flex align-items-center gap-2 py-2 text-primary">
+                                    <div className="spinner-border spinner-border-sm" role="status"></div>
+                                    <span className="small">Buscando horários disponíveis...</span>
+                                </div>
+                            ) : availableTimes.length === 0 ? (
+                                <div className="alert alert-warning py-2 mb-0 small">
+                                    <i className="bi bi-exclamation-triangle me-1"></i>
+                                    Nenhum horário disponível para esta data.
+                                </div>
+                            ) : (
+                                <div className="d-flex flex-wrap gap-2 mt-1">
+                                    {availableTimes.map((time) => {
+                                        const formattedTime = formatTimeDisplay(time);
+                                        const isSelected = selectedTime === time;
+
+                                        return (
+                                            <button
+                                                key={time}
+                                                type="button"
+                                                className={`btn ${isSelected ? 'btn-primary' : 'btn-outline-primary'
+                                                    } rounded-3 px-3 py-2 fw-semibold d-flex flex-column align-items-center justify-content-center`}
+                                                style={{ minWidth: '90px', transition: 'all 0.15s ease-in-out' }}
+                                                onClick={() => setSelectedTime(time)}
+                                            >
+                                                <span className="fs-6">{formattedTime}</span>
+                                                <span className="small opacity-75" style={{ fontSize: '0.7rem' }}>
+                                                    {isSelected ? 'Selecionado' : 'Disponível'}
+                                                </span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="col-12">
+                            <TextArea
+                                label="Observações do atendimento (opcional)"
+                                rows={3}
+                                placeholder="Preferências do cliente, observações, etc."
+                                value={notes}
+                                onChange={(e) => setNotes(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="col-12 d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                            <button
+                                type="button"
+                                className="btn btn-outline-secondary"
+                                onClick={() => navigate(-1)}
+                                disabled={submitting}
+                            >
+                                Voltar
+                            </button>
+                            <button
+                                type="submit"
+                                className="btn btn-primary px-4"
+                                disabled={submitting || !selectedTime}
+                            >
+                                {submitting ? (
+                                    <>
+                                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                        Confirmando...
+                                    </>
+                                ) : (
+                                    'Confirmar Agendamento'
+                                )}
+                            </button>
+                        </div>
                     </div>
-                </div>
+                </form>
             )}
-
-            <div className="mb-4">
-                <label className="form-label fw-semibold">Observações</label>
-                <textarea
-                    className="form-control"
-                    rows={3}
-                    placeholder="Preferências, observações, etc."
-                    value={observacao}
-                    onChange={(e) => setObservacao(e.target.value)}
-                />
-            </div>
-
-            <div className="d-flex justify-content-end gap-2">
-                <button type="button" className="btn btn-outline-secondary" onClick={onCancelar}>
-                    Cancelar
-                </button>
-                <button
-                    type="submit"
-                    className="btn text-white"
-                    style={{ backgroundColor: COR_PRIMARIA, opacity: podeSalvar ? 1 : 0.6 }}
-                    disabled={!podeSalvar}
-                >
-                    Confirmar Agendamento
-                </button>
-            </div>
-        </form>
+        </div>
     );
 }
