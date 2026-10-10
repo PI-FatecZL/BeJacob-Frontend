@@ -11,15 +11,14 @@ export interface ServicoOpcao {
 export interface DadosAgendamento {
     servicoId: number;
     servico: string;
-    data: string;
-    horario: string;
-    observacao: string;
+    data: string; 
+    horario: string; 
+    observacao: string; 
 }
 
 interface Props {
     nomeUsuario: string;
     servicos: ServicoOpcao[];
-    //  Confirmar os horários ocupados na data (Conferir se está certo)
     horariosOcupados?: (data: string) => string[];
     onSalvar: (dados: DadosAgendamento) => void;
     onCancelar: () => void;
@@ -27,7 +26,7 @@ interface Props {
 
 const COR_PRIMARIA = "#4F694F";
 
-// mesmos horários da tela administrativa
+
 function gerarHorarios(): string[] {
     const lista: string[] = [];
     for (let h = 8; h <= 19; h++) {
@@ -73,7 +72,7 @@ export default function FormAgendamento({
     };
 
     const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+        e.preventDefault(); // evita recarregar a página
         if (!servicoSelecionado || !podeSalvar) return;
         onSalvar({
             servicoId: servicoSelecionado.id,
@@ -86,7 +85,6 @@ export default function FormAgendamento({
 
     return (
         <form onSubmit={handleSubmit}>
-            {/* Nome do usuário só para confirmar?!?! */}
             <div className="mb-3">
                 <label className="form-label fw-semibold">Cliente</label>
                 <input type="text" className="form-control" value={nomeUsuario} readOnly disabled />
@@ -125,7 +123,8 @@ export default function FormAgendamento({
                 </div>
             </div>
 
-            {/* IDEIA: mostrar preço e tempo médio */}
+            {/* mostrar preço e tempo médio */}
+            {/* só aparece depois que um serviço é escolhido */}
             {servicoSelecionado && (
                 <div
                     className="d-flex flex-wrap gap-4 rounded-3 px-3 py-2 mb-3"
@@ -149,7 +148,8 @@ export default function FormAgendamento({
                 </div>
             )}
 
-            {/*IDEIA: o horario é para aparecer só aparece depois de escolher a data */}
+            {/*o horario é para aparecer só aparece depois de escolher a data */}
+            {/* O ocupado fica desabilitado e cinza; o escolhido fica verde */}
             {data && (
                 <div className="mb-3">
                     <label className="form-label fw-semibold">
@@ -162,7 +162,7 @@ export default function FormAgendamento({
                             return (
                                 <button
                                     key={h}
-                                    type="button"
+                                    type="button" 
                                     disabled={indisponivel}
                                     onClick={() => setHorario(h)}
                                     className="btn d-flex flex-column align-items-center px-3 py-2"

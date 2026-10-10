@@ -5,12 +5,13 @@ import Footer from "../components/landingPage/Footer";
 import FormAgendamento, {
     type DadosAgendamento,
     type ServicoOpcao,
-} from "../components/form/Agendamento";
+} from "../components/agendamento/Agendamento";
 import { authService } from "../services/authService";
 import { userService } from "../services/userService";
 import type { UserResponse } from "../types/user";
 
 // SUBSTITUIIIIIR
+// Dado mockado
 const SERVICOS_MOCK: ServicoOpcao[] = [
     { id: 1, nome: "Corte Feminino", preco: 90, duracaoMinutos: 60 },
     { id: 2, nome: "Escova", preco: 60, duracaoMinutos: 45 },
@@ -25,6 +26,7 @@ export default function SolicitarAgendamento() {
     const [usuario, setUsuario] = useState<UserResponse | null>(null);
     const [carregando, setCarregando] = useState<boolean>(true);
 
+    // nome aparece travado no formulário
     useEffect(() => {
         async function carregarUsuario() {
             try {
@@ -54,6 +56,7 @@ export default function SolicitarAgendamento() {
         navigate("/minha-conta");
     };
 
+    // Tela de carregamento
     if (carregando) {
         return (
             <div className="d-flex flex-column min-vh-100">
@@ -69,6 +72,7 @@ export default function SolicitarAgendamento() {
         );
     }
 
+    // Tela de erro, não conseguiu carregar o usuário
     if (!usuario) {
         return (
             <div className="d-flex flex-column min-vh-100">
