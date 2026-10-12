@@ -41,6 +41,11 @@ export default function Clientes() {
         if (loggedUserId && String(u.id) === String(loggedUserId)) {
             return false;
         }
+
+        if (!u.isActive) {
+            return false;
+        }
+
         const term = search.trim().toLowerCase();
         if (!term) return true;
         return u.name.toLowerCase().includes(term);

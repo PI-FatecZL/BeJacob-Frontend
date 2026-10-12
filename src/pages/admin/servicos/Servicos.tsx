@@ -25,6 +25,7 @@ export default function Servicos() {
         setError(null);
         try {
             const data = await serviceService.findAll();
+            console.log("Dados dos serviços:", data);
             setServices(data);
         } catch {
             setError('Não foi possível carregar os serviços.');

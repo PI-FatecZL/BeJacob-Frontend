@@ -5,35 +5,9 @@ import { authService } from "../services/authService";
 import { useNavigate } from "react-router-dom";
 import { userService } from "../services/userService";
 import type { UserResponse } from "../types/user";
-import ModalNovoAgendamento from "../components/agendamento/ModalNovoAgendamento";
-import type {
-    DadosAgendamento,
-    ServicoOpcao,
-} from "../components/agendamento/Agendamento";
-
-interface Agendamento {
-    id: number;
-    servico: string;
-    data: string;
-    horario: string; 
-    observacao: string;
-    status: "Pendente" | "Confirmado"; 
-}
-
-// Dado mokado
-const SERVICOS_MOCK: ServicoOpcao[] = [
-    { id: 1, nome: "Corte Feminino", preco: 90, duracaoMinutos: 60 },
-    { id: 2, nome: "Escova", preco: 60, duracaoMinutos: 45 },
-    { id: 3, nome: "Manicure", preco: 35, duracaoMinutos: 40 },
-    { id: 4, nome: "Design de Sobrancelha", preco: 40, duracaoMinutos: 30 },
-    { id: 5, nome: "Coloração", preco: 180, duracaoMinutos: 120 },
-];
-
-// Converte data
-function formatarData(iso: string): string {
-    const [ano, mes, dia] = iso.split("-");
-    return `${dia}/${mes}/${ano}`;
-}
+import type { AppointmentResponse } from "../types/appointment";
+import { appointmentService } from "../services/appointmentService";
+import Select from "../components/form/Select";
 
 export default function MinhaConta() {
     const navigate = useNavigate();
@@ -41,69 +15,93 @@ export default function MinhaConta() {
     const [usuario, setUsuario] = useState<UserResponse | null>(null);
     const [carregando, setCarregando] = useState<boolean>(true);
 
-    const [modalAberto, setModalAberto] = useState<boolean>(false);
+    const [agendamentos, setAgendamentos] = useState<AppointmentResponse[]>([]);
 
-    // Lista de agendamentos do usuário
-    // integração: carregar da API em vez de estado local (começa com o exemplo que já existia)
-    const [agendamentos, setAgendamentos] = useState<Agendamento[]>([
-        {
-            id: 1,
-            servico: "Serviço",
-            data: "2026-10-15",
-            horario: "14:00",
-            observacao: "",
-            status: "Confirmado",
-        },
-    ]);
+    const [statusFilter, setStatusFilter] = useState<string>('ALL');
+    const [periodFilter, setPeriodFilter] = useState<string>('ALL');
 
     useEffect(() => {
-        async function carregarUsuario() {
-            try {
-                setCarregando(true);
-                const userId = authService.getUserId();
-
-                if (!userId) {
-                    navigate("/");
-                    return;
-                }
-
-                const dadosUsuario = await userService.findById(userId);
-                setUsuario(dadosUsuario);
-            } catch (error) {
-                console.error("Erro ao buscar usuário:", error);
-            } finally {
-                setCarregando(false);
-            }
-        }
-
-        carregarUsuario();
+        loadInitialData();
     }, [navigate]);
+
+    const loadInitialData = async () => {
+        setCarregando(true);
+        try {
+            const userId = authService.getUserId();
+
+            if (!userId) {
+                navigate("/");
+                return;
+            }
+
+            // Carrega o usuário e os agendamentos em paralelo
+            const [dadosUsuario, dadosAgendamentos] = await Promise.all([
+                userService.findById(userId),
+                appointmentService.listMyAppointments()
+            ]);
+
+            // Trata caso a API retorne paginação (SpringPage) ou um array direto
+            const typedAgendamentos = dadosAgendamentos as any;
+            const listaAgendamentos = Array.isArray(typedAgendamentos)
+                ? typedAgendamentos
+                : typedAgendamentos?.content || [];
+
+            setUsuario(dadosUsuario);
+            setAgendamentos(listaAgendamentos);
+        } catch (error) {
+            console.error("Erro ao carregar dados iniciais:", error);
+        } finally {
+            setCarregando(false);
+        }
+    };
 
     const handleLogout = () => {
         authService.logout();
         navigate("/");
     };
 
-    const handleSalvarAgendamento = (dados: DadosAgendamento) => {
-        const novo: Agendamento = {
-            id: Date.now(), 
-            servico: dados.servico,
-            data: dados.data,
-            horario: dados.horario,
-            observacao: dados.observacao,
-            // todo agendamento novo começa pendente, até o salão confirmar
-            status: "Pendente",
-        };
-        setAgendamentos((atual) => [...atual, novo]);
-        setModalAberto(false);
+    const formatDateTime = (isoString: string) => {
+        try {
+            const date = new Date(isoString);
+            return date.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+        } catch {
+            return isoString;
+        }
     };
 
-    // Horários já usados numa data, para o modal marcar como "Ocupado"
-    // integração: os horários ocupados virão da API (de todos os clientes, não só deste usuário)
-    const horariosOcupados = (data: string): string[] =>
-        agendamentos.filter((a) => a.data === data).map((a) => a.horario);
+    const agendamentosFiltrados = agendamentos.filter((appt) => {
 
-    // 1. CORREÇÃO DE ESTRUTURA PARA TELA DE CARREGAMENTO
+        // filtro por status
+        const matchesStatus = statusFilter === 'ALL' || appt.status === statusFilter;
+
+        // filtro por periodo
+        let matchesPeriod = true;
+        if (periodFilter !== 'ALL' && appt.startsAt) {
+            const apptDate = new Date(appt.startsAt);
+            const today = new Date();
+
+            today.setHours(0, 0, 0, 0);
+            const apptDateOnly = new Date(apptDate.getFullYear(), apptDate.getMonth(), apptDate.getDate());
+
+            if (periodFilter === 'TODAY') {
+                matchesPeriod = apptDateOnly.getTime() === today.getTime();
+            } else if (periodFilter === 'WEEK') {
+                const startOfWeek = new Date(today);
+                startOfWeek.setDate(today.getDate() - today.getDay());
+                const endOfWeek = new Date(startOfWeek);
+                endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+                matchesPeriod = apptDateOnly >= startOfWeek && apptDateOnly <= endOfWeek;
+            } else if (periodFilter === 'MONTH') {
+                matchesPeriod =
+                    apptDate.getMonth() === today.getMonth() &&
+                    apptDate.getFullYear() === today.getFullYear();
+            }
+        }
+
+        return matchesStatus && matchesPeriod;
+    });
+
     if (carregando) {
         return (
             <div className="d-flex flex-column min-vh-100">
@@ -119,7 +117,6 @@ export default function MinhaConta() {
         );
     }
 
-    // 2. CORREÇÃO DE ESTRUTURA PARA TELA DE ERRO
     if (!usuario) {
         return (
             <div className="d-flex flex-column min-vh-100">
@@ -132,12 +129,6 @@ export default function MinhaConta() {
         );
     }
 
-    // Ordena do mais próximo para o mais distante (data e depois horário)
-    const agendamentosOrdenados = [...agendamentos].sort((a, b) =>
-        `${a.data} ${a.horario}`.localeCompare(`${b.data} ${b.horario}`)
-    );
-
-    // 3. CORREÇÃO DE ESTRUTURA PARA TELA PRINCIPAL
     return (
         <div className="d-flex flex-column min-vh-100">
             <Navbar />
@@ -188,7 +179,7 @@ export default function MinhaConta() {
                                     type="button"
                                     className="btn btn-sm rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm"
                                     style={{ width: "36px", height: "36px", backgroundColor: "#4F694F" }}
-                                    onClick={() => setModalAberto(true)}
+                                    onClick={() => navigate("/solicitar-agendamento")}
                                     aria-label="Novo agendamento"
                                     title="Novo agendamento"
                                 >
@@ -196,34 +187,72 @@ export default function MinhaConta() {
                                 </button>
                             </div>
 
-                            {agendamentosOrdenados.length === 0 ? (
+                            <div className="d-flex flex-wrap gap-2">
+                                <div style={{ width: '160px' }}>
+                                    <Select
+                                        size="sm"
+                                        value={statusFilter}
+                                        onChange={(e) => setStatusFilter(e.target.value)}
+                                        placeholder=""
+                                        options={[
+                                            { label: 'Todos os status', value: 'ALL' },
+                                            { label: 'Agendado', value: 'SCHEDULED' },
+                                            { label: 'Concluído', value: 'COMPLETED' },
+                                            { label: 'Cancelado', value: 'CANCELED' }
+                                        ]}
+                                    />
+                                </div>
+
+                                <div style={{ width: '160px' }}>
+                                    <Select
+                                        size="sm"
+                                        value={periodFilter}
+                                        onChange={(e) => setPeriodFilter(e.target.value)}
+                                        placeholder=""
+                                        options={[
+                                            { label: 'Todo o período', value: 'ALL' },
+                                            { label: 'Hoje', value: 'TODAY' },
+                                            { label: 'Esta semana', value: 'WEEK' },
+                                            { label: 'Este mês', value: 'MONTH' }
+                                        ]}
+                                    />
+                                </div>
+                            </div>
+
+
+                            {agendamentosFiltrados.length === 0 ? (
                                 <p className="text-muted small mb-0">Você ainda não possui agendamentos.</p>
                             ) : (
                                 <div className="list-group list-group-flush">
-                                    {agendamentosOrdenados.map((ag) => (
+                                    {agendamentosFiltrados.map((ag) => (
                                         <div
                                             key={ag.id}
                                             className="list-group-item d-flex justify-content-between align-items-center px-0 py-3"
                                         >
                                             <div>
-                                                <h6 className="mb-1 fw-semibold">{ag.servico}</h6>
+                                                <h6 className="mb-1 fw-semibold">{ag.service.name}</h6>
                                                 <small className="text-muted">
-                                                    {formatarData(ag.data)} às {ag.horario}
+                                                    {formatDateTime(ag.startsAt)}
                                                 </small>
-                                                {ag.observacao && (
+                                                {ag.notes && (
                                                     <div>
-                                                        <small className="text-muted fst-italic">{ag.observacao}</small>
+                                                        <small className="text-muted fst-italic">{ag.notes}</small>
                                                     </div>
                                                 )}
                                             </div>
-                                            {/* Selo de status: verde para confirmado, amarelo para pendente */}
-                                            {ag.status === "Confirmado" ? (
-                                                <span className="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill">
-                                                    Confirmado
+                                            {ag.status === 'SCHEDULED' && (
+                                                <span className="badge bg-info-subtle text-info border border-info-subtle px-3 py-2 rounded-pill">
+                                                    Agendamento Confirmado
                                                 </span>
-                                            ) : (
-                                                <span className="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-2 rounded-pill">
-                                                    Pendente
+                                            )}
+                                            {ag.status === 'CANCELED' && (
+                                                <span className="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-pill">
+                                                    Agendamento Cancelado
+                                                </span>
+                                            )}
+                                            {ag.status === 'COMPLETED' && (
+                                                <span className="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill">
+                                                    Agendamento Concluído
                                                 </span>
                                             )}
                                         </div>
@@ -234,8 +263,8 @@ export default function MinhaConta() {
                     </div>
                 </div>
             </div>
-
-            {/* O modal só existe na tela enquanto modalAberto for true */}
+            <Footer />
+            {/*
             {modalAberto && (
                 <ModalNovoAgendamento
                     nomeUsuario={usuario.name}
@@ -245,8 +274,7 @@ export default function MinhaConta() {
                     onFechar={() => setModalAberto(false)}
                 />
             )}
-
-            <Footer />
+            */}
         </div>
     );
 }
