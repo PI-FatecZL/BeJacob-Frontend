@@ -3,7 +3,8 @@ import type { ServiceRequest, ServiceResponse } from '../../../types/service';
 import Modal from '../../../components/ui/Modal';
 import Input from '../../../components/form/Input';
 import TextArea from '../../../components/form/TextArea';
-import Checkbox from '../../../components/form/CheckBox';
+// AJUSTE AQUI: Mudado de 'CheckBox' (conforme o erro) para 'Checkbox' (com b minúsculo)
+import Checkbox from '../../../components/form/Checkbox'; 
 
 interface EditarServicoProps {
     idModal: string;
@@ -140,7 +141,6 @@ export default function EditarServico({ idModal, service, onSave }: EditarServic
                     >
                         Cancelar
                     </button>
-                    {/* O botão submit não tem data-bs-dismiss para garantir a validação dos campos */}
                     <button 
                         type="submit" 
                         className="btn btn-primary text-white"
