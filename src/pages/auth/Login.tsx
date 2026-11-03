@@ -11,13 +11,22 @@ export default function Login() {
     const [email, setEmail] = useState("");
     const [senha, setSenha] = useState("");
 
+    const [validated, setValidated] = useState(false);
     const [erro, setErro] = useState("");
 
     // gerenciador de navegação para uso das rotas definidas em AppRoutes
     const navigate = useNavigate();
 
-    const handleSubmit = async (e: FormEvent) => {
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        const form = e.currentTarget;
+
+        setValidated(true);
+
+        if (form.checkValidity() === false) {
+            e.stopPropagation();
+            return;
+        }
 
         try {
             await authService.login({
@@ -42,22 +51,24 @@ export default function Login() {
                         <div className="card-body">
                             <h2 className="text-center mb-4">Entrar</h2>
 
-                            <form onSubmit={handleSubmit}>
+                            <form onSubmit={handleSubmit} noValidate className={validated ? "was-validated" : ""}>
                                 <Alert mensagem={erro} />
 
                                 <Input 
-                                    label="Email"
+                                    label="E-mail"
                                     margin="mb-3"
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
+                                    errorFeedback="Insira seu e-mail"
                                 />
 
                                 <InputSenha 
                                     margin="mb-4"
                                     value={senha}
                                     onChange={(e) => setSenha(e.target.value)}
+                                    errorFeedback="Insira sua senha"
                                 />
 
                                 <button type="submit" className="btn btn-primary w-100 fw-medium">Entrar</button>

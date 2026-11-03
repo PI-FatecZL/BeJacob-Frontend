@@ -2,23 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/landingPage/Navbar";
 import Footer from "../components/landingPage/Footer";
-import FormAgendamento, {
-    type DadosAgendamento,
-    type ServicoOpcao,
-} from "../components/agendamento/Agendamento";
+import FormAgendamento from "../components/agendamento/Agendamento";
 import { authService } from "../services/authService";
 import { userService } from "../services/userService";
 import type { UserResponse } from "../types/user";
-
-// SUBSTITUIIIIIR
-// Dado mockado
-const SERVICOS_MOCK: ServicoOpcao[] = [
-    { id: 1, nome: "Corte Feminino", preco: 90, duracaoMinutos: 60 },
-    { id: 2, nome: "Escova", preco: 60, duracaoMinutos: 45 },
-    { id: 3, nome: "Manicure", preco: 35, duracaoMinutos: 40 },
-    { id: 4, nome: "Design de Sobrancelha", preco: 40, duracaoMinutos: 30 },
-    { id: 5, nome: "Coloração", preco: 180, duracaoMinutos: 120 },
-];
 
 export default function SolicitarAgendamento() {
     const navigate = useNavigate();
@@ -49,12 +36,6 @@ export default function SolicitarAgendamento() {
 
         carregarUsuario();
     }, [navigate]);
-
-    const handleSalvar = (dados: DadosAgendamento) => {
-        // Dado mockado, substituir
-        console.log("Novo agendamento (mock):", dados);
-        navigate("/minha-conta");
-    };
 
     // Tela de carregamento
     if (carregando) {
@@ -99,12 +80,7 @@ export default function SolicitarAgendamento() {
                                 </h5>
                             </div>
                             <div className="p-4">
-                                <FormAgendamento
-                                    nomeUsuario={usuario.name}
-                                    servicos={SERVICOS_MOCK}
-                                    onSalvar={handleSalvar}
-                                    onCancelar={() => navigate("/minha-conta")}
-                                />
+                                <FormAgendamento />
                             </div>
                         </div>
                     </div>
