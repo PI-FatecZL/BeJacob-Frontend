@@ -4,7 +4,7 @@ import Modal from '../../../components/ui/Modal';
 import Input from '../../../components/form/Input';
 import TextArea from '../../../components/form/TextArea';
 // AJUSTE AQUI: Mudado de 'CheckBox' (conforme o erro) para 'Checkbox' (com b minúsculo)
-import Checkbox from '../../../components/form/Checkbox'; 
+import Checkbox from '../../../components/form/Checkbox';
 
 interface EditarServicoProps {
     idModal: string;
@@ -126,23 +126,26 @@ export default function EditarServico({ idModal, service, onSave }: EditarServic
                 </div>
 
                 <Checkbox
-                    id="editarAtivoCheck"
+                    id={`editarAtivoCheck-${service?.id || 'novo'}`}
                     label="Ativo"
                     checked={form.active}
-                    onChange={(e) => setForm({ ...form, active: e.target.checked })}
+                    onChange={(e) => {
+                        console.log("Mudou para:", e.target.checked);
+                        setForm({ ...form, active: e.target.checked });
+                    }}
                 />
 
                 <div className="d-flex justify-content-end gap-2">
-                    <button 
-                        type="button" 
-                        className="btn btn-outline-secondary btn-sm" 
+                    <button
+                        type="button"
+                        className="btn btn-outline-secondary btn-sm"
                         data-bs-dismiss="modal"
                         disabled={loading}
                     >
                         Cancelar
                     </button>
-                    <button 
-                        type="submit" 
+                    <button
+                        type="submit"
                         className="btn btn-primary text-white"
                         disabled={loading}
                     >

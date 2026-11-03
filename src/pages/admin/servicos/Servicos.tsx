@@ -61,7 +61,11 @@ export default function Servicos() {
         setError(null);
         try {
             const updated = await serviceService.update(selectedService.id, data);
-            setServices((prev) => prev.map((s) => (s.id === selectedService.id ? updated : s)));
+            setServices((prev) =>
+                prev.map((s) =>
+                    s.id === selectedService.id ? { ...s, ...updated, active: data.active } : s
+                )
+            );
         } catch {
             setError('Não foi possível atualizar o serviço.');
         }
