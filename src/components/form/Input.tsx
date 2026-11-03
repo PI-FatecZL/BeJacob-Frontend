@@ -13,11 +13,13 @@ interface InputProps {
     disabled?: boolean;
     placeholder?: string;
     size?: "sm" | "lg" | string;
+    pattern?: string;      // Adicionado para suportar validação com Regex (ex: telefone)
+    errorFeedback?: string; // Nova propriedade para a mensagem de erro customizada
 }
 
 export default function Input({
     label,
-    margin,
+    margin = "mb-3", // Definido uma margem padrão caso não envie nenhuma
     type = "text",
     value,
     onChange,
@@ -27,13 +29,16 @@ export default function Input({
     required = false,
     disabled = false,
     placeholder,
-    size
+    size,
+    pattern,
+    errorFeedback
 }: InputProps) {
     const sizeClass = size === "sm" ? "form-control-sm" : size === "lg" ? "form-control-lg" : "";
 
     return (
         <div className={margin}>
             {label && <label className="mb-1 form-label fw-medium text-primary">{label}</label>}
+            
             <input
                 type={type}
                 className={`form-control ${sizeClass} border-1 shadow-sm input-custom-focus`.trim()}
@@ -45,7 +50,15 @@ export default function Input({
                 required={required}
                 disabled={disabled}
                 placeholder={placeholder}
+                pattern={pattern} // Repassa o pattern para a tag nativa
             />
+
+            {/* Se houver um texto de feedback, ele renderiza colado abaixo do input */}
+            {errorFeedback && (
+                <div className="invalid-feedback text-start mt-1">
+                    {errorFeedback}
+                </div>
+            )}
         </div>
     );
 }
