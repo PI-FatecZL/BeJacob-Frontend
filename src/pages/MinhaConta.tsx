@@ -27,16 +27,9 @@ export default function MinhaConta() {
     const loadInitialData = async () => {
         setCarregando(true);
         try {
-            const userId = authService.getUserId();
-
-            if (!userId) {
-                navigate("/");
-                return;
-            }
-
             // Carrega o usuário e os agendamentos em paralelo
             const [dadosUsuario, dadosAgendamentos] = await Promise.all([
-                userService.findById(userId),
+                authService.getMe(),
                 appointmentService.listMyAppointments()
             ]);
 
@@ -175,16 +168,18 @@ export default function MinhaConta() {
                         <div className="card shadow-sm border-0 rounded-4 p-4">
                             <div className="d-flex justify-content-between align-items-center mb-3">
                                 <h5 className="card-title mb-0 fw-bold">Meus Agendamentos</h5>
+
                                 <button
                                     type="button"
-                                    className="btn btn-sm rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm"
-                                    style={{ width: "36px", height: "36px", backgroundColor: "#4F694F" }}
+                                    className="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
                                     onClick={() => navigate("/solicitar-agendamento")}
                                     aria-label="Novo agendamento"
                                     title="Novo agendamento"
+                                    style={{ width: "35px", height: "35px", padding: 0 }}
                                 >
                                     <i className="bi bi-plus-lg"></i>
                                 </button>
+
                             </div>
 
                             <div className="d-flex flex-wrap gap-2">
