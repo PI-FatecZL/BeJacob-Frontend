@@ -1,5 +1,5 @@
 import { api } from "../api/api";
-import type { DataToken, LoginRequest, RegisterUserRequest, RegisterUserResponse, UserResponse } from "../types/user";
+import type { DataToken, LoginRequest, RegisterUserRequest, UserResponse } from "../types/user";
 
 export const authService = {
     login: async(dados: LoginRequest): Promise<DataToken> => {
@@ -47,6 +47,18 @@ export const authService = {
         const token = authService.getToken(); 
         
         const response = await api.get<UserResponse>('/auth/me', {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        return response.data;
+    },
+
+    updateMe: async (dados: { name: string; phone: string; email: string }): Promise<UserResponse> => {
+        const token = authService.getToken();
+
+        const response = await api.patch<UserResponse>('/auth/me', dados, {
             headers: {
                 Authorization: `Bearer ${token}`
             }

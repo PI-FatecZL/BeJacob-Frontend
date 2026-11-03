@@ -3,7 +3,6 @@ import Navbar from "../components/landingPage/Navbar";
 import Footer from "../components/landingPage/Footer";
 import { authService } from "../services/authService";
 import { useNavigate } from "react-router-dom";
-import { userService } from "../services/userService";
 import type { UserResponse } from "../types/user";
 import type { AppointmentResponse } from "../types/appointment";
 import { appointmentService } from "../services/appointmentService";
@@ -20,6 +19,15 @@ export default function MinhaConta() {
     const [statusFilter, setStatusFilter] = useState<string>('ALL');
     const [periodFilter, setPeriodFilter] = useState<string>('ALL');
 
+    // --- NOVOS ESTADOS PARA O FLUXO DE EDIÇÃO ---
+    const [isEditing, setIsEditing] = useState<boolean>(false);
+    const [editName, setEditName] = useState<string>("");
+    const [editPhone, setEditPhone] = useState<string>("");
+    const [editEmail, setEditEmail] = useState<string>("");
+    const [salvando, setSalvando] = useState<boolean>(false);
+    const [erroEdicao, setErroEdicao] = useState<string>("");
+    const [sucessoEdicao, setSucessoEdicao] = useState<string>("")
+
     useEffect(() => {
         loadInitialData();
     }, [navigate]);
@@ -27,13 +35,11 @@ export default function MinhaConta() {
     const loadInitialData = async () => {
         setCarregando(true);
         try {
-            // Carrega o usuário e os agendamentos em paralelo
             const [dadosUsuario, dadosAgendamentos] = await Promise.all([
                 authService.getMe(),
                 appointmentService.listMyAppointments()
             ]);
 
-            // Trata caso a API retorne paginação (SpringPage) ou um array direto
             const typedAgendamentos = dadosAgendamentos as any;
             const listaAgendamentos = Array.isArray(typedAgendamentos)
                 ? typedAgendamentos
@@ -41,10 +47,77 @@ export default function MinhaConta() {
 
             setUsuario(dadosUsuario);
             setAgendamentos(listaAgendamentos);
+
+            // Inicializa os estados de edição com os dados que vieram do banco
+            if (dadosUsuario) {
+                setEditName(dadosUsuario.name);
+                setEditPhone(formatarTelefone(dadosUsuario.phone));;
+                setEditEmail(dadosUsuario.email);
+            }
         } catch (error) {
             console.error("Erro ao carregar dados iniciais:", error);
         } finally {
             setCarregando(false);
+        }
+    };
+
+    const handleStartEditing = () => {
+        if (usuario) {
+            setEditName(usuario.name);
+            setEditPhone(formatarTelefone(usuario.phone));
+            setEditEmail(usuario.email);
+        }
+        setErroEdicao("");
+        setIsEditing(true);
+    };
+
+    // Cancela as alterações e fecha o formulário
+    const handleCancelEditing = () => {
+        setIsEditing(false);
+        setErroEdicao("");
+    };
+
+    const handleSaveProfile = async () => {
+        if (!editName.trim() || !editEmail.trim()) {
+            setErroEdicao("Nome e E-mail são obrigatórios.");
+            return;
+        }
+
+        setSalvando(true);
+        setErroEdicao("");
+        setSucessoEdicao("");
+
+        const telefoneApenasNumeros = editPhone.replace(/\D/g, "");
+
+        try {
+            const emailFoiAlterado = editEmail.trim().toLowerCase() !== usuario?.email.trim().toLowerCase();
+
+            // Chamando o método unificado do serviço de autenticação
+            const dadosAtualizados = await authService.updateMe({
+                name: editName,
+                phone: telefoneApenasNumeros,
+                email: editEmail
+            });
+
+            if (emailFoiAlterado) {
+                setSucessoEdicao("E-mail alterado com sucesso! Redirecionando para o login em instantes...");
+                setIsEditing(false);
+
+                setTimeout(() => {
+                    authService.logout();
+                    navigate("/login");
+                }, 3500);
+
+                return;
+            }
+
+            setUsuario(dadosAtualizados);
+            setIsEditing(false);
+        } catch (error) {
+            console.error("Erro ao atualizar dados do perfil:", error);
+            setErroEdicao("Não foi possível salvar as alterações. Verifique os dados inseridos.");
+        } finally {
+            setSalvando(false);
         }
     };
 
@@ -60,6 +133,13 @@ export default function MinhaConta() {
         } catch {
             return isoString;
         }
+    };
+
+    const formatarTelefone = (valor: string): string => {
+        const apenasNumeros = valor.replace(/\D/g, "").slice(0, 11);
+        return apenasNumeros
+            .replace(/^(\d{2})(\d)/, "($1) $2")
+            .replace(/(\d{5})(\d{1,4})$/, "$1-$2");
     };
 
     const agendamentosFiltrados = agendamentos.filter((appt) => {
@@ -148,21 +228,86 @@ export default function MinhaConta() {
 
                     <div className="col-md-8">
                         <div className="card shadow-sm border-0 rounded-4 p-4 mb-4">
-                            <h5 className="card-title mb-3 fw-bold">Informações Pessoais</h5>
+                            <div className="d-flex justify-content-between align-items-center mb-3">
+                                <h5 className="card-title mb-0 fw-bold">Informações Pessoais</h5>
+
+                                {!isEditing ? (
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-outline-primary"
+                                        onClick={handleStartEditing}
+                                    >
+                                        <i className="bi bi-pencil me-1"></i> Alterar Dados
+                                    </button>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-outline-secondary"
+                                        onClick={handleCancelEditing}
+                                        disabled={salvando}
+                                    >
+                                        Cancelar
+                                    </button>
+                                )}
+                            </div>
+
+                            {erroEdicao && <div className="alert alert-danger py-2 small mb-3">{erroEdicao}</div>}
+
+                            {/* Se o seu componente <Alert /> aceitar uma prop de variante/tipo (ex: tipo="success"), você pode usá-lo. 
+    Caso contrário, usamos a estrutura padrão do Bootstrap para mensagens verdes de sucesso: */}
+                            {sucessoEdicao && (
+                                <div className="alert alert-success py-2 small mb-3 d-flex align-items-center gap-2">
+                                    <i className="bi bi-check-circle-fill"></i>
+                                    <span>{sucessoEdicao}</span>
+                                </div>
+                            )}
+
                             <div className="row g-3">
                                 <div className="col-sm-6">
                                     <label className="form-label text-muted small">Nome Completo</label>
-                                    <input type="text" className="form-control" value={usuario.name} readOnly />
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        value={isEditing ? editName : usuario.name}
+                                        onChange={(e) => setEditName(e.target.value)}
+                                        readOnly={!isEditing}
+                                    />
                                 </div>
                                 <div className="col-sm-6">
                                     <label className="form-label text-muted small">Telefone</label>
-                                    <input type="text" className="form-control" value={usuario.phone} readOnly />
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        value={isEditing ? editPhone : formatarTelefone(usuario.phone)}
+                                        onChange={(e) => setEditPhone(formatarTelefone(e.target.value))}
+                                        readOnly={!isEditing}
+                                    />
                                 </div>
                                 <div className="col-12">
                                     <label className="form-label text-muted small">E-mail</label>
-                                    <input type="email" className="form-control" value={usuario.email} readOnly />
+                                    <input
+                                        type="email"
+                                        className="form-control"
+                                        value={isEditing ? editEmail : usuario.email}
+                                        onChange={(e) => setEditEmail(e.target.value)}
+                                        readOnly={!isEditing}
+                                    />
                                 </div>
                             </div>
+
+                            {/* Exibe o botão de salvar apenas quando estiver editando */}
+                            {isEditing && (
+                                <div className="d-flex justify-content-end mt-3">
+                                    <button
+                                        type="button"
+                                        className="btn btn-primary btn-sm px-4"
+                                        onClick={handleSaveProfile}
+                                        disabled={salvando}
+                                    >
+                                        {salvando ? "Salvando..." : "Salvar Alterações"}
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                         <div className="card shadow-sm border-0 rounded-4 p-4">
