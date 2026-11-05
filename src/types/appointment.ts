@@ -3,10 +3,13 @@ import type { UserResponse } from "./user";
 
 export type AppointmentStatus = "SCHEDULED" | "CANCELED" | "COMPLETED" | "NO_SHOW";
 
+export type PaymentMethod = "PIX" | "DEBIT" | "CREDIT" | "CASH";
+
 export interface CreateAppointmentRequest {
     serviceId: number;
     startsAt: string;
     notes: string;
+    paymentMethod: PaymentMethod;
 }
 
 export interface CreateAppointmentAdminRequest {
@@ -15,6 +18,7 @@ export interface CreateAppointmentAdminRequest {
     startsAt: string;
     notes: string;
     status: AppointmentStatus;
+    paymentMethod: PaymentMethod;
 }
 
 export interface UpdateAppointmentRequest {
@@ -22,6 +26,7 @@ export interface UpdateAppointmentRequest {
     startsAt?: string;
     notes?: string;
     status?: AppointmentStatus;
+    paymentMethod?: PaymentMethod;
 }
 
 export interface AppointmentResponse {
@@ -32,5 +37,7 @@ export interface AppointmentResponse {
     endsAt: string;
     notes: string;
     status: AppointmentStatus;
+    price: number;
+    paymentMethod: PaymentMethod;
     createdAt: string;
 }

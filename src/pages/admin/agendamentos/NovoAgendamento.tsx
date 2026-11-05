@@ -7,6 +7,14 @@ import { serviceService } from '../../../services/serviceService';
 import Select from '../../../components/form/Select';
 import Input from '../../../components/form/Input';
 import TextArea from '../../../components/form/TextArea';
+import type { PaymentMethod } from '../../../types/appointment';
+
+const FORMAS_PAGAMENTO = [
+    { label: "Cartão de Crédito", value: "CREDIT" },
+    { label: "Cartão de Débito", value: "DEBIT" },
+    { label: "Pix", value: "PIX" },
+    { label: "Dinheiro", value: "CASH" }
+];
 
 // interface genérica para determinar itens em um select 
 interface OptionItem {
@@ -40,6 +48,7 @@ export default function NovoAgendamento() {
     const [selectedServiceId, setSelectedServiceId] = useState<number | ''>('');
     const [selectedDate, setSelectedDate] = useState<string>('');
     const [selectedTime, setSelectedTime] = useState<string>('');
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | ''>('');
     const [notes, setNotes] = useState<string>('');
 
     useEffect(() => {
@@ -101,7 +110,7 @@ export default function NovoAgendamento() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!selectedUserId || !selectedServiceId || !selectedDate || !selectedTime) {
+        if (!selectedServiceId || !selectedDate || !selectedTime || !selectedPaymentMethod) {
             setError('Por favor, preencha todos os campos obrigatórios.');
             return;
         }
@@ -118,7 +127,8 @@ export default function NovoAgendamento() {
                 serviceId: Number(selectedServiceId),
                 startsAt,
                 notes,
-                status: 'SCHEDULED'
+                status: 'SCHEDULED',
+                paymentMethod: selectedPaymentMethod
             });
 
             navigate('/admin/agendamentos');
@@ -189,7 +199,7 @@ export default function NovoAgendamento() {
                                     />
                                 </div>
 
-                                <div className="col-12 col-md-6">
+                                <div className="col-12 col-md-3">
                                     <Input
                                         label="Data do Atendimento"
                                         type="date"
@@ -197,6 +207,17 @@ export default function NovoAgendamento() {
                                         onChange={(e) => setSelectedDate(e.target.value)}
                                         min={getTodayDateString()}
                                         required
+                                    />
+                                </div>
+
+                                <div className="col-12 col-md-3">
+                                    <Select
+                                        label="Forma de Pagamento"
+                                        required
+                                        value={selectedPaymentMethod}
+                                        onChange={(e) => setSelectedPaymentMethod(e.target.value as PaymentMethod | '')}
+                                        placeholder="Selecione uma forma..."
+                                        options={FORMAS_PAGAMENTO}
                                     />
                                 </div>
 
