@@ -7,7 +7,14 @@ import { serviceService } from '../../../services/serviceService';
 import Select from '../../../components/form/Select';
 import Input from '../../../components/form/Input';
 import TextArea from '../../../components/form/TextArea';
-import type { AppointmentStatus } from '../../../types/appointment';
+import type { AppointmentStatus, PaymentMethod } from '../../../types/appointment';
+
+const FORMAS_PAGAMENTO = [
+    { label: "Cartão de Crédito", value: "CREDIT" },
+    { label: "Cartão de Débito", value: "DEBIT" },
+    { label: "Pix", value: "PIX" },
+    { label: "Dinheiro", value: "CASH" }
+];
 
 // interface genérica para determinar itens em um select 
 interface OptionItem {
@@ -43,6 +50,7 @@ export default function EditarAgendamento() {
     const [selectedDate, setSelectedDate] = useState<string>('');
     const [selectedTime, setSelectedTime] = useState<string>('');
     const [status, setStatus] = useState<AppointmentStatus>('SCHEDULED');
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | ''>('');
     const [notes, setNotes] = useState<string>('');
 
     // carregar dados do agendamento
@@ -86,6 +94,7 @@ export default function EditarAgendamento() {
                 setSelectedServiceId(appointmentData.service?.id || '');
                 setStatus(appointmentData.status || 'SCHEDULED');
                 setNotes(appointmentData.notes || '');
+                setSelectedPaymentMethod(appointmentData.paymentMethod || '');
 
                 if (appointmentData.startsAt) {
                     const [datePart, timePart] = appointmentData.startsAt.split('T');
@@ -132,7 +141,7 @@ export default function EditarAgendamento() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!id || !selectedUserId || !selectedServiceId || !selectedDate || !selectedTime) {
+        if (!selectedServiceId || !selectedDate || !selectedTime || !selectedPaymentMethod) {
             setError('Por favor, preencha todos os campos obrigatórios.');
             return;
         }
@@ -149,6 +158,7 @@ export default function EditarAgendamento() {
                 startsAt,
                 notes,
                 status,
+                paymentMethod: selectedPaymentMethod
             });
 
             navigate('/admin/agendamentos');
@@ -220,7 +230,7 @@ export default function EditarAgendamento() {
                                     />
                                 </div>
 
-                                <div className="col-12 col-md-6">
+                                <div className="col-12 col-md-3">
                                     <Input
                                         label="Data do Atendimento"
                                         type="date"
@@ -228,6 +238,17 @@ export default function EditarAgendamento() {
                                         onChange={(e) => setSelectedDate(e.target.value)}
                                         min={getTodayDateString()}
                                         required
+                                    />
+                                </div>
+
+                                <div className="col-12 col-md-3">
+                                    <Select
+                                        label="Forma de Pagamento"
+                                        required
+                                        value={selectedPaymentMethod}
+                                        onChange={(e) => setSelectedPaymentMethod(e.target.value as PaymentMethod | '')}
+                                        placeholder="Selecione uma forma..."
+                                        options={FORMAS_PAGAMENTO}
                                     />
                                 </div>
 

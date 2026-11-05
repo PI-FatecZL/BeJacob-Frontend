@@ -2,9 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/landingPage/Navbar";
 import Footer from "../components/landingPage/Footer";
-import FormAgendamento from "../components/agendamento/Agendamento";
+import FormAgendamento from "../components/agendamento/FormAgendamento";
 import { authService } from "../services/authService";
-import { userService } from "../services/userService";
 import type { UserResponse } from "../types/user";
 
 export default function SolicitarAgendamento() {
@@ -18,14 +17,7 @@ export default function SolicitarAgendamento() {
         async function carregarUsuario() {
             try {
                 setCarregando(true);
-                const userId = authService.getUserId();
-
-                if (!userId) {
-                    navigate("/");
-                    return;
-                }
-
-                const dadosUsuario = await userService.findById(userId);
+                const dadosUsuario = await authService.getMe();
                 setUsuario(dadosUsuario);
             } catch (error) {
                 console.error("Erro ao buscar usuário:", error);

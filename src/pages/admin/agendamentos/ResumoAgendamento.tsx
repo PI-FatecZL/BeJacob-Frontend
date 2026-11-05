@@ -31,6 +31,16 @@ export default function ResumoAgendamento({ idModal, appointment }: ResumoAgenda
         }
     };
 
+    const getPaymentMethodLabel = (paymentMethod: string) => {
+        switch (paymentMethod) {
+            case 'CREDIT': return 'Cartão de Crédito';
+            case 'PIX': return 'PIX';
+            case 'DEBIT': return 'Cartão de Débito';
+            case 'CASH': return 'Dinheiro';
+            default: return status;
+        }
+    };
+
     // função para formatar data e hora
     const formatDateTime = (isoString?: string) => {
         if (!isoString) return '-';
@@ -86,6 +96,13 @@ export default function ResumoAgendamento({ idModal, appointment }: ResumoAgenda
                     )}
                 </div>
 
+                <div className="p-3 bg-light rounded-3 border">
+                    <h6 className="text-primary mb-2 d-flex align-items-center gap-2">
+                        <i className="bi bi-cash"></i> Forma de Pagamento
+                    </h6>
+                    <div className="fw-semibold text-dark">{getPaymentMethodLabel(appointment.paymentMethod)}</div>
+                </div>
+
                 <div className="row g-2">
                     <div className="col-6">
                         <div className="p-2 border rounded text-center">
@@ -103,7 +120,7 @@ export default function ResumoAgendamento({ idModal, appointment }: ResumoAgenda
 
                 <div className="p-3 border rounded-3">
                     <h6 className="text-muted small fw-medium mb-1">Observações / Notas</h6>
-                    <p className="m-0 small text-secondary style-italic">
+                    <p className="m-0 small text-dark text-break">
                         {appointment.notes ? appointment.notes : 'Nenhuma observação registrada.'}
                     </p>
                 </div>

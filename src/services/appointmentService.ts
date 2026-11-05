@@ -19,7 +19,7 @@ export const appointmentService = {
     getAvailableTimes: async (date: string, serviceId: number): Promise<string[]> => {
         const response = await api.get<string[]>('/appointments/availability', {
             params: {
-                date,      // Formato esperado pelo Java: 'YYYY-MM-DD'
+                date,      
                 serviceId
             }
         });
