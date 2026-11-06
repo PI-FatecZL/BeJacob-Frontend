@@ -112,11 +112,41 @@ export default function Notificacoes() {
         }
     };
 
-    const formatDate = (value: string) => {
-        const date = new Date(value);
-        return Number.isNaN(date.getTime())
-            ? value
-            : date.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+
+    const formatDate = (value: string): string => {
+        const isoDate = value.match(
+            /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?(Z|[+-]\d{2}:?\d{2})?)?$/
+        );
+
+        const brazilianDate = value.match(
+            /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[ ,T]+(\d{1,2}):(\d{2}))?$/
+        );
+
+        if (isoDate) {
+            const [, year, month, day, hours = "00", minutes = "00", timezone] = isoDate;
+
+            if (timezone) {
+                const date = new Date(value);
+
+                if (Number.isNaN(date.getTime())) return value;
+
+                const pad = (number: number) => String(number).padStart(2, "0");
+
+                return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}, ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+            }
+
+            return `${day}/${month}/${year}, ${hours}:${minutes}`;
+        }
+
+        if (brazilianDate) {
+            const [, day, month, year, hours = "00", minutes = "00"] = brazilianDate;
+
+            const pad = (value: string) => value.padStart(2, "0");
+
+            return `${pad(day)}/${pad(month)}/${year}, ${pad(hours)}:${minutes}`;
+        }
+
+        return value;
     };
 
     return (
@@ -168,14 +198,8 @@ export default function Notificacoes() {
                                                             <span className="badge bg-primary">Não lida</span>
                                                         )}
                                                     </div>
-                                                    <p className="text-muted small mb-1">
-                                                        Cliente: {notification.clientName} · Serviço: {notification.serviceName}
-                                                    </p>
-                                                    <p className="text-muted small mb-1">
-                                                        Agendamento: {formatDate(notification.appointmentDate)}
-                                                    </p>
                                                     <small className="text-muted">
-                                                        Recebida em {formatDate(notification.createdAt)}
+                                                        {formatDate(notification.createdAt)}
                                                     </small>
                                                 </div>
                                             </div>

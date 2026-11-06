@@ -1,11 +1,34 @@
-
+import { useEffect, useState } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { authService } from '../../services/authService';
+import type { UserResponse } from '../../types/user';
 import NotificationIcon from './NotificationIcon';
 
 export default function DashboardSidebar() {
     const location = useLocation();
     const navigate = useNavigate();
+    const [usuario, setUsuario] = useState<UserResponse | null>(null);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        authService.getMe()
+            .then((user) => {
+                if (isMounted) {
+                    setUsuario(user);
+                }
+            })
+            .catch((error) => {
+                console.error('Não foi possível carregar o usuário logado:', error);
+            });
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    const userName = usuario?.name ?? 'Usuário';
+    const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=ffffff&color=4F694F&bold=true&size=128`;
 
     const handleLogout = () => {
         authService.logout();
@@ -105,14 +128,14 @@ export default function DashboardSidebar() {
                             aria-expanded="false"
                         >
                             <img
-                                src="/perfil.png"
+                                src={avatarUrl}
                                 alt="Foto do usuário"
                                 width="32"
                                 height="32"
                                 className="rounded-circle me-2"
                             />
 
-                            <strong>Usuário</strong>
+                            <strong>{userName}</strong>
                         </a>
 
                         <ul
@@ -120,14 +143,8 @@ export default function DashboardSidebar() {
                             aria-labelledby="dropdownUser1"
                         >
                             <li>
-                                <Link className="dropdown-item" to="/perfil">
-                                    Meu Perfil
-                                </Link>
-                            </li>
-
-                            <li>
-                                <Link className="dropdown-item" to="/configuracoes">
-                                    Ajustes
+                                <Link className="dropdown-item" to="/admin/configuracoes">
+                                    Configurações
                                 </Link>
                             </li>
 
@@ -239,7 +256,7 @@ export default function DashboardSidebar() {
                             aria-expanded="false"
                         >
                             <img
-                                src="/perfil.png"
+                                src={avatarUrl}
                                 alt="Foto do usuário"
                                 width="30"
                                 height="30"
@@ -252,14 +269,8 @@ export default function DashboardSidebar() {
                             aria-labelledby="dropdownUserMobile"
                         >
                             <li>
-                                <Link className="dropdown-item" to="/perfil">
-                                    Meu Perfil
-                                </Link>
-                            </li>
-
-                            <li>
-                                <Link className="dropdown-item" to="/configuracoes">
-                                    Ajustes
+                                <Link className="dropdown-item" to="/admin/configuracoes">
+                                    Configurações
                                 </Link>
                             </li>
 
