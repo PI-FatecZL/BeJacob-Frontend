@@ -12,6 +12,7 @@ import Clientes from '../pages/admin/clientes/Clientes';
 import Agendamentos from '../pages/admin/agendamentos/Agendamentos';
 import NovoAgendamento from '../pages/admin/agendamentos/NovoAgendamento';
 import EditarAgendamento from '../pages/admin/agendamentos/EditarAgendamento';
+import Notificacoes from '../pages/admin/Notificacoes';
 
 export default function AppRoutes() {
     return (
@@ -87,6 +88,15 @@ export default function AppRoutes() {
                 element={
                     <PrivateRoute requiredRole="ADMIN">
                         <Agendamentos />
+                    </PrivateRoute>
+                }
+            />
+
+            <Route
+                path={"/admin/notificacoes"}
+                element={
+                    <PrivateRoute requiredRole="ADMIN">
+                        <Notificacoes />
                     </PrivateRoute>
                 }
             />
