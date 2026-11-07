@@ -7,28 +7,39 @@ import { useEffect, useState, type FormEvent } from "react";
 import {
     passwordResetService,
     SenhaRejeitadaError,
+    RequisicaoRedefinicaoInvalidaError,
     TokenRedefinicaoInvalidoError
 } from "../../services/passwordResetService";
 import { escaparRegex } from "../../utils/escaparRegex";
 
+// Regra de senha exigida pelo back-end: mínimo de 8 caracteres, uma letra maiúscula e um
+// caractere especial da lista abaixo (a mesma regex do Java, adaptada para o atributo `pattern`).
+// Por isso, `( ) [ ] { } | / - \` aparecem escapados dentro dos colchetes: o navegador compila o
+// `pattern` no modo "v", que exige isso. Em Java (e no modo "u") esses escapes também são válidos.
+// String.raw evita ter de duplicar cada barra invertida.
 const PADRAO_SENHA = String.raw`^(?=.*[A-Z])(?=.*[!@#$%^&*\(\)_+\-=\[\]\{\};':"\\\|,.<>\/?]).{8,}$`;
 const MENSAGEM_SENHA = "Sua senha deve ter no mínimo 8 caracteres, uma letra maiúscula e um caractere especial: ! @ # $ % ^ & * ( ) _ + - = [ ] { } ; ' : \" \\ | , . < > / ?";
 
 type StatusTela = "validando" | "formulario" | "tokenInvalido" | "erroServidor" | "sucesso";
 
 export default function RedefinirSenha() {
+    // token recebido no link do e-mail (/redefinir-senha?token=TOKEN)
+    // Não é salvo em localStorage nem enviado a logs pela tela; permanece na URL até a navegação.
     const [searchParams] = useSearchParams();
     const token = searchParams.get("token");
 
+    // definindo estados das informações do formulário
     const [senha, setSenha] = useState("");
     const [confirmarSenha, setConfirmarSenha] = useState("");
 
     const [validated, setValidated] = useState(false);
     const [erro, setErro] = useState("");
     const [carregando, setCarregando] = useState(false);
+    // sem token na URL o link é inválido; com token, ele precisa ser validado antes de mostrar o formulário
     const [status, setStatus] = useState<StatusTela>(token ? "validando" : "tokenInvalido");
     const [tentativa, setTentativa] = useState(0);
 
+    // validação antecipada: o formulário só aparece depois que o back-end confirma que o token é válido
     useEffect(() => {
         if (!token) return;
 
@@ -39,8 +50,10 @@ export default function RedefinirSenha() {
                 await passwordResetService.validateResetToken(token, controller.signal);
                 setStatus("formulario");
             } catch (error) {
+                // requisição cancelada (a tela foi fechada ou a validação reiniciada): nada a mostrar
                 if (controller.signal.aborted) return;
 
+                // não registramos o erro no console para não expor o token
                 setStatus(error instanceof TokenRedefinicaoInvalidoError ? "tokenInvalido" : "erroServidor");
             }
         };
@@ -76,14 +89,19 @@ export default function RedefinirSenha() {
 
         try {
             await passwordResetService.resetPassword({ token: token, newPassword: senha });
+            // as senhas não ficam guardadas depois do envio
             setSenha("");
             setConfirmarSenha("");
             setStatus("sucesso");
         } catch (error) {
+            // não registramos o erro no console para não expor o token
             if (error instanceof TokenRedefinicaoInvalidoError) {
                 setStatus("tokenInvalido");
             } else if (error instanceof SenhaRejeitadaError) {
-                setErro("Não foi possível redefinir a senha. Verifique se ela atende aos requisitos e é diferente da senha atual.");
+                // o formulário continua aberto para o usuário corrigir a senha
+                setErro("Não foi possível redefinir a senha. Confira os requisitos e se ela é diferente da senha atual.");
+            } else if (error instanceof RequisicaoRedefinicaoInvalidaError) {
+                setErro("Não foi possível concluir a redefinição. Confira os dados ou solicite outro link de recuperação.");
             } else {
                 setErro("Não foi possível redefinir sua senha agora. Tente novamente em instantes.");
             }
