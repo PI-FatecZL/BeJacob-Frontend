@@ -5,6 +5,7 @@ import InputSenha from "../../components/form/InputSenha";
 import Alert from "../../components/ui/Alert";
 import { useState, type FormEvent } from "react";
 import { authService } from "../../services/authService";
+import { isAxiosError } from "axios";
 
 export default function Login() {
     // definindo estados das informações do formulário
@@ -13,6 +14,8 @@ export default function Login() {
 
     const [validated, setValidated] = useState(false);
     const [erro, setErro] = useState("");
+    const [mostrarEsqueciSenha, setMostrarEsqueciSenha] = useState(false);
+    const [carregando, setCarregando] = useState(false);
 
     // gerenciador de navegação para uso das rotas definidas em AppRoutes
     const navigate = useNavigate();
@@ -28,15 +31,26 @@ export default function Login() {
             return;
         }
 
+        setErro("");
+        setCarregando(true);
+
         try {
-            await authService.login({
-                email: email, 
-                password: senha
-            });
+            await authService.login({ email: email.trim(), password: senha });
             navigate("/admin/dashboard");
         } catch (error) {
-            console.error(error);
-            setErro("E-mail ou senha inválidos. Tente novamente.");
+            // O back-end usado nos testes retorna 400 para credenciais inválidas.
+            // Não mostramos recuperação em falhas de rede ou erros de servidor.
+            const credenciaisInvalidas = isAxiosError(error) &&
+                (error.response?.status === 400 || error.response?.status === 401);
+
+            if (credenciaisInvalidas) {
+                setErro("E-mail ou senha inválidos. Tente novamente.");
+                setMostrarEsqueciSenha(true);
+            } else {
+                setErro("Não foi possível entrar agora. Tente novamente em instantes.");
+            }
+        } finally {
+            setCarregando(false);
         }
     }
 
@@ -54,7 +68,7 @@ export default function Login() {
                             <form onSubmit={handleSubmit} noValidate className={validated ? "was-validated" : ""}>
                                 <Alert mensagem={erro} />
 
-                                <Input 
+                                <Input
                                     label="E-mail"
                                     margin="mb-3"
                                     type="email"
@@ -64,14 +78,24 @@ export default function Login() {
                                     errorFeedback="Insira seu e-mail"
                                 />
 
-                                <InputSenha 
-                                    margin="mb-4"
+                                <InputSenha
+                                    margin="mb-2"
                                     value={senha}
                                     onChange={(e) => setSenha(e.target.value)}
                                     errorFeedback="Insira sua senha"
                                 />
 
-                                <button type="submit" className="btn btn-primary w-100 fw-medium">Entrar</button>
+                                {mostrarEsqueciSenha && (
+                                    <div className="text-end mb-4">
+                                        <Link to="/esqueci-senha" className="text-decoration-none small">
+                                            Esqueci minha senha?
+                                        </Link>
+                                    </div>
+                                )}
+
+                                <button type="submit" className="btn btn-primary w-100 fw-medium" disabled={carregando}>
+                                    {carregando ? "Entrando..." : "Entrar"}
+                                </button>
                             </form>
 
                             <div className="text-center mt-3">

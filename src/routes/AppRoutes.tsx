@@ -2,6 +2,8 @@ import { Routes, Route } from 'react-router-dom'
 import LandingPage from '../pages/LandingPage';
 import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
+import EsqueciSenha from '../pages/auth/EsqueciSenha';
+import RedefinirSenha from '../pages/auth/RedefinirSenha';
 import PrivateRoute from './PrivateRoute';
 import SolicitarAgendamento from '../pages/SolicitarAgendamento';
 import MinhaConta from '../pages/MinhaConta';
@@ -36,6 +38,20 @@ export default function AppRoutes() {
                 path={"/register"}
                 element={
                     <Register />
+                }
+            />
+
+            <Route
+                path={"/esqueci-senha"}
+                element={
+                    <EsqueciSenha />
+                }
+            />
+
+            <Route
+                path={"/redefinir-senha"}
+                element={
+                    <RedefinirSenha />
                 }
             />
 
@@ -120,13 +136,13 @@ export default function AppRoutes() {
                 }
             />
 
-            <Route 
+            <Route
                 path={"/admin/agendamentos/editar/:id" }
                 element={
                     <PrivateRoute requiredRole="ADMIN">
                         <EditarAgendamento />
                     </PrivateRoute>
-                } 
+                }
             />
 
             <Route
