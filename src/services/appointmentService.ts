@@ -1,5 +1,5 @@
 import { api } from "../api/api";
-import type { AppointmentResponse, CreateAppointmentAdminRequest, CreateAppointmentRequest, UpdateAppointmentRequest } from "../types/appointment";
+import type { AppointmentResponse, CancelAppointmentRequest, CreateAppointmentAdminRequest, CreateAppointmentRequest, UpdateAppointmentRequest } from "../types/appointment";
 import type { SpringPage } from "../types/pagination";
 
 export const appointmentService = {
@@ -64,8 +64,8 @@ export const appointmentService = {
     },
 
     // cancelar agendamento
-    cancel: async (id: number): Promise<AppointmentResponse> => {
-        const response = await api.patch<AppointmentResponse>(`/appointments/${id}/cancel`);
+    cancel: async (id: number, dados: CancelAppointmentRequest): Promise<AppointmentResponse> => {
+        const response = await api.patch<AppointmentResponse>(`/appointments/${id}/cancel`, dados);
         return response.data;
     }
 }

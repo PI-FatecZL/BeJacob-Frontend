@@ -3,11 +3,12 @@ import DashboardLayout from "../../../components/layout/DashboardLayout";
 
 import ModalConfirmacao from '../../../components/ui/ModalConfirmacao';
 import ResumoAgendamento from './ResumoAgendamento';
-import type { AppointmentResponse, UpdateAppointmentRequest } from '../../../types/appointment';
+import type { AppointmentResponse, CancelAppointmentRequest, UpdateAppointmentRequest } from '../../../types/appointment';
 import type { SpringPage } from '../../../types/pagination';
 import { appointmentService } from '../../../services/appointmentService';
 import { useNavigate } from 'react-router-dom';
 import Select from '../../../components/form/Select';
+import { ModalCancelamento } from '../../../components/agendamento/ModalCancelamento';
 
 export default function Agendamentos() {
     const [pageData, setPageData] = useState<SpringPage<AppointmentResponse> | null>(null);
@@ -98,17 +99,22 @@ export default function Agendamentos() {
     };
 
     // função para cancelar agendamento
-    const handleCancelAppointment = async () => {
+    const handleCancelAppointment = async (motivo: string) => {
         if (!selectedAppointment) return;
         setError(null);
         try {
-            await appointmentService.cancel(selectedAppointment.id);
+            const payload: CancelAppointmentRequest = {
+                cancellationReason: motivo 
+            };
+
+            await appointmentService.cancel(selectedAppointment.id, payload);
             loadAppointments();
             setSelectedAppointment(null);
         } catch {
             setError('Não foi possível cancelar o agendamento.');
         }
     };
+
 
     // função para formatar a data para tabela geral
     const formatDateTime = (isoString: string) => {
@@ -323,12 +329,9 @@ export default function Agendamentos() {
                 onConfirmar={handleCompleteAppointment}
             />
 
-            {/* modal para confirmar o cancelamento de um agendamento */}
-            <ModalConfirmacao
+            <ModalCancelamento
                 id="modalCancelarAgendamento"
-                titulo="Confirmar Cancelamento"
-                descricao={`Deseja realmente cancelar o agendamento do cliente ${selectedAppointment?.user?.name}?`}
-                tipo="danger"
+                titulo="Cancelar Agendamento"
                 onConfirmar={handleCancelAppointment}
             />
         </DashboardLayout>
