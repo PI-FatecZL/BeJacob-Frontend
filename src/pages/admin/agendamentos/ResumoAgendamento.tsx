@@ -125,6 +125,17 @@ export default function ResumoAgendamento({ idModal, appointment }: ResumoAgenda
                     </p>
                 </div>
 
+                {appointment.status === 'CANCELED' && (
+                    <div className="p-3 bg-danger-subtle border border-danger-subtle rounded-3 text-danger-emphasis">
+                        <h6 className="small fw-bold mb-1 d-flex align-items-center gap-2 text-danger">
+                            <i className="bi bi-exclamation-octagon"></i> Motivo do Cancelamento
+                        </h6>
+                        <p className="m-0 small text-break">
+                            {appointment.cancellationReason ? appointment.cancellationReason : 'Nenhum motivo foi informado.'}
+                        </p>
+                    </div>
+                )}
+
                 <div className="d-flex justify-content-end mt-2">
                     <button
                         type="button"

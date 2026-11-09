@@ -39,5 +39,10 @@ export interface AppointmentResponse {
     status: AppointmentStatus;
     price: number;
     paymentMethod: PaymentMethod;
+    cancellationReason: string;
     createdAt: string;
+}
+
+export interface CancelAppointmentRequest {
+    cancellationReason: string;
 }
