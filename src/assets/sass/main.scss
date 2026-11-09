@@ -112,3 +112,7 @@ body {
   border-color: #4F694F !important;
   outline: 0 !important;
 }
+
+@media (min-width: 768px) { 
+  .bg-md-white { background-color: #fff !important; } 
+}
