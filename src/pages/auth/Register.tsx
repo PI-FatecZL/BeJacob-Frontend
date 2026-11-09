@@ -59,11 +59,11 @@ export default function Register() {
     };
 
     return (
-        <div className="container-fluid vh-100">
+        <div className="container-fluid vh-100 auth-banner-bg bg-md-white">
             <div className="row h-100">
                 <AuthBanner />
 
-                <div className="col-md-6 d-flex justify-content-center align-items-center">
+                <div className="col-md-6 d-flex justify-content-center align-items-center h-100 bg-md-white">
                     <div className="card shadow rounded-4 border-0 p-4"
                         style={{ width: "100%", maxWidth: "450px" }}>
                         <div className="card-body">

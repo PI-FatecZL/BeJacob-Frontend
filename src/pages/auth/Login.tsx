@@ -14,7 +14,6 @@ export default function Login() {
 
     const [validated, setValidated] = useState(false);
     const [erro, setErro] = useState("");
-    const [mostrarEsqueciSenha, setMostrarEsqueciSenha] = useState(false);
     const [carregando, setCarregando] = useState(false);
 
     // gerenciador de navegação para uso das rotas definidas em AppRoutes
@@ -45,7 +44,6 @@ export default function Login() {
 
             if (credenciaisInvalidas) {
                 setErro("E-mail ou senha inválidos. Tente novamente.");
-                setMostrarEsqueciSenha(true);
             } else {
                 setErro("Não foi possível entrar agora. Tente novamente em instantes.");
             }
@@ -54,12 +52,12 @@ export default function Login() {
         }
     }
 
-    return(
-        <div className="container-fluid vh-100">
+    return (
+        <div className="container-fluid vh-100 auth-banner-bg bg-md-white">
             <div className="row h-100">
                 <AuthBanner />
 
-                <div className="col-md-6 d-flex justify-content-center align-items-center">
+                <div className="col-md-6 d-flex justify-content-center align-items-center h-100 bg-md-white">
                     <div className="card shadow rounded-4 border-0 p-4"
                         style={{ width: "100%", maxWidth: "450px" }}>
                         <div className="card-body">
@@ -85,13 +83,11 @@ export default function Login() {
                                     errorFeedback="Insira sua senha"
                                 />
 
-                                {mostrarEsqueciSenha && (
-                                    <div className="text-end mb-4">
-                                        <Link to="/esqueci-senha" className="text-decoration-none small">
-                                            Esqueci minha senha?
-                                        </Link>
-                                    </div>
-                                )}
+                                <div className="text-end mb-4">
+                                    <Link to="/esqueci-senha" className="text-decoration-none small">
+                                        Esqueci minha senha?
+                                    </Link>
+                                </div>
 
                                 <button type="submit" className="btn btn-primary w-100 fw-medium" disabled={carregando}>
                                     {carregando ? "Entrando..." : "Entrar"}
