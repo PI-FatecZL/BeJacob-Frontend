@@ -8,6 +8,7 @@ import Select from '../../../components/form/Select';
 import Input from '../../../components/form/Input';
 import TextArea from '../../../components/form/TextArea';
 import type { PaymentMethod } from '../../../types/appointment';
+import { authService } from '../../../services/authService';
 
 const FORMAS_PAGAMENTO = [
     { label: "Cartão de Crédito", value: "CREDIT" },
@@ -68,16 +69,37 @@ export default function NovoAgendamento() {
     const loadInitialData = async () => {
         setLoadingOptions(true);
         try {
-            const [usersData, servicesData] = await Promise.all([
+            const [usersData, servicesData, loggedUser] = await Promise.all([
                 userService.findAll(),
-                serviceService.findAll()
+                serviceService.findAll(),
+                authService.getMe()
             ]);
 
             const typedUsers = usersData as any;
             const typedServices = servicesData as any;
 
-            setUsers(Array.isArray(typedUsers) ? typedUsers : typedUsers?.content || []);
-            setServices(Array.isArray(typedServices) ? typedServices : typedServices?.content || []);
+            const rawUsersList: any[] = Array.isArray(typedUsers) ? typedUsers : typedUsers?.content || [];
+
+            const loggedUserId = loggedUser?.id ? String(loggedUser.id) : null;
+
+            const allowedUsers = rawUsersList.filter((u) => {
+                if (loggedUserId && String(u.id) === loggedUserId) {
+                    return false;
+                }
+                if (!u.isActive) {
+                    return false;
+                }
+                return true;
+            });
+
+            const rawServicesList: any[] = Array.isArray(typedServices) ? typedServices : typedServices?.content || [];
+            
+            const allowedServices = rawServicesList.filter((s) => {
+                return s.active; 
+            });
+
+            setUsers(allowedUsers);
+            setServices(allowedServices);
         } catch {
             setError('Erro ao carregar a lista de clientes e serviços.');
         } finally {

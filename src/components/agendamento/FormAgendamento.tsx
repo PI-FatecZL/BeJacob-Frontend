@@ -65,7 +65,13 @@ export default function FormAgendamento() {
 
             const typedServices = servicesData as any;
 
-            setServices(Array.isArray(typedServices) ? typedServices : typedServices?.content || []);
+            const rawServicesList: any[] = Array.isArray(typedServices) ? typedServices : typedServices?.content || [];
+            
+            const allowedServices = rawServicesList.filter((s) => {
+                return s.active; 
+            });
+
+            setServices(allowedServices);
         } catch {
             setError('Erro ao carregar a lista de serviços.');
         } finally {

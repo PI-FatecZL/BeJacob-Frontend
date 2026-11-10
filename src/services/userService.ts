@@ -25,5 +25,11 @@ export const userService = {
     // excluir um usuário
     delete: async (id: number): Promise<void> => {
         await api.delete(`/users/${id}`);
+    },
+
+    // reativar usuário
+    reactive: async (id: number): Promise<void> => {
+        await api.patch(`/users/${id}`, { isActive: true });
     }
+
 }

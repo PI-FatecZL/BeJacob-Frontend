@@ -5,6 +5,8 @@ import ModalConfirmacao from '../../../components/ui/ModalConfirmacao';
 import type { UserResponse } from '../../../types/user';
 import type { SpringPage } from '../../../types/pagination';
 import { userService } from '../../../services/userService';
+import { authService } from '../../../services/authService';
+import Select from '../../../components/form/Select';
 
 export default function Clientes() {
     const [pageData, setPageData] = useState<SpringPage<UserResponse> | null>(null);
@@ -14,6 +16,24 @@ export default function Clientes() {
     const [search, setSearch] = useState('');
 
     const [selectedUser, setSelectedUser] = useState<UserResponse | null>(null);
+
+    const [statusFilter, setStatusFilter] = useState<'ativos' | 'inativos'>('ativos');
+
+    const [loggedUserId, setLoggedUserId] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchLoggedUser = async () => {
+            try {
+                const user = await authService.getMe(); // Espera a Promise resolver
+                if (user?.id) {
+                    setLoggedUserId(String(user.id));
+                }
+            } catch (err) {
+                console.error("Erro ao buscar usuário logado:", err);
+            }
+        };
+        fetchLoggedUser();
+    }, []);
 
     useEffect(() => {
         loadUsers();
@@ -35,18 +55,24 @@ export default function Clientes() {
     // Extrai a lista de usuários segura do pageData para fazer o filtro visual
     const usersList = pageData?.content || [];
 
+    const term = search.trim().toLowerCase();
+
     // função para filtrar usuário
     const filteredUsers = usersList.filter((u) => {
-        const loggedUserId = localStorage.getItem('id');
-        if (loggedUserId && String(u.id) === String(loggedUserId)) {
+        // 1. Remove o usuário logado
+        if (loggedUserId && String(u.id) === loggedUserId) {
             return false;
         }
 
-        if (!u.isActive) {
+        // 2. Aplica o filtro do Select (Ativos / Inativos)
+        if (statusFilter === 'ativos' && !u.isActive) {
+            return false;
+        }
+        if (statusFilter === 'inativos' && u.isActive) {
             return false;
         }
 
-        const term = search.trim().toLowerCase();
+        // 3. Aplica o filtro do termo de busca
         if (!term) return true;
         return u.name.toLowerCase().includes(term);
     });
@@ -58,10 +84,31 @@ export default function Clientes() {
         try {
             await userService.delete(selectedUser.id);
             loadUsers();
-        } catch {
-            setError('Não foi possível excluir o usuário.');
+        } catch (err: any) {
+            if (err.response && err.response.status == 409) {
+                setError(`O cliente possui agendamentos futuros pendentes. Cancele ou conclua os agendamentos pendentes antes de excluir o usuário`);
+            } else {
+                setError('Não foi possível excluir o usuário.');
+            }
         }
     };
+
+    const handleReactiveUser = async () => {
+        if (!selectedUser) return;
+        setError(null);
+        try {
+            await userService.reactive(selectedUser.id);
+            loadUsers();
+        } catch {
+            setError('Não foi possível reativar o usuário.');
+        }
+    };
+
+    const statusOptions = [
+        { label: 'Ativos', value: 'ativos' },
+        { label: 'Inativos', value: 'inativos' }
+    ];
+
 
     return (
         <DashboardLayout>
@@ -76,7 +123,7 @@ export default function Clientes() {
                 <div className="p-3">
                     {error && <div className="alert alert-danger py-2">{error}</div>}
 
-                    <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                    <div className="d-flex flex-wrap align-items-center gap-2 mb-3">
                         <div className="input-group input-group-sm" style={{ maxWidth: '280px' }}>
                             <span className="input-group-text bg-white">
                                 <i className="bi bi-search"></i>
@@ -89,6 +136,14 @@ export default function Clientes() {
                                 onChange={(e) => setSearch(e.target.value)}
                             />
                         </div>
+
+                        <Select
+                            size="sm"
+                            placeholder="" // Deixamos vazio para não exibir o "Selecione..." padrão
+                            value={statusFilter}
+                            options={statusOptions}
+                            onChange={(e) => setStatusFilter(e.target.value as any)}
+                        />
                     </div>
 
                     {loading ? (
@@ -120,15 +175,27 @@ export default function Clientes() {
                                                 <td className="text-muted small">{u.email}</td>
                                                 <td className="text-muted small">{u.phone}</td>
                                                 <td className="text-end">
-                                                    <button
-                                                        className="btn btn-sm btn-outline-danger"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#modalExcluirUsuario"
-                                                        onClick={() => setSelectedUser(u)}
-                                                        title="Excluir"
-                                                    >
-                                                        <i className="bi bi-trash"></i>
-                                                    </button>
+                                                    {u.isActive ? (
+                                                        <button
+                                                            className="btn btn-sm btn-outline-danger"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#modalExcluirUsuario"
+                                                            onClick={() => setSelectedUser(u)}
+                                                            title="Excluir"
+                                                        >
+                                                            <i className="bi bi-trash"></i>
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            className="btn btn-sm btn-outline-warning"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#modalReativarUsuario"
+                                                            onClick={() => setSelectedUser(u)}
+                                                            title="Reativar"
+                                                        >
+                                                            <i className="bi bi-arrow-counterclockwise"></i>
+                                                        </button>
+                                                    )}
                                                 </td>
                                             </tr>
                                         ))}
@@ -136,7 +203,6 @@ export default function Clientes() {
                                 </table>
                             </div>
 
-                            {/* 3. Controles de Paginação do Bootstrap */}
                             <div className="d-flex justify-content-between align-items-center mt-3 field-pagination">
                                 <span className="text-muted small">
                                     Mostrando {filteredUsers.length} de {pageData?.totalElements || 0} clientes
@@ -186,6 +252,19 @@ export default function Clientes() {
                 }
                 tipo="danger"
                 onConfirmar={handleDeleteUser}
+            />
+
+            <ModalConfirmacao
+                id="modalReativarUsuario"
+                titulo="Confirmar Reativação"
+                descricao={
+                    <>
+                        Tem certeza que deseja reativar o perfil do cliente{' '}
+                        <strong>{selectedUser?.name}</strong>?
+                    </>
+                }
+                tipo="warning"
+                onConfirmar={handleReactiveUser}
             />
         </DashboardLayout>
     );
