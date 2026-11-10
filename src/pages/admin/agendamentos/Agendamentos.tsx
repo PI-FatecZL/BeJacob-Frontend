@@ -17,7 +17,7 @@ export default function Agendamentos() {
     const [error, setError] = useState<string | null>(null);
     const [search, setSearch] = useState('');
 
-    const [statusFilter, setStatusFilter] = useState<string>('ALL');
+    const [statusFilter, setStatusFilter] = useState<string>('SCHEDULED');
     const [periodFilter, setPeriodFilter] = useState<string>('ALL');
 
     const [selectedAppointment, setSelectedAppointment] = useState<AppointmentResponse | null>(null);
