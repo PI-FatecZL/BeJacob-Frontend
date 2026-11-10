@@ -86,8 +86,14 @@ export default function EditarAgendamento() {
             const typedUsers = usersData as any;
             const typedServices = servicesData as any;
 
+            const rawServicesList: any[] = Array.isArray(typedServices) ? typedServices : typedServices?.content || [];
+            
+            const allowedServices = rawServicesList.filter((s) => {
+                return s.active; 
+            });
+
             setUsers(Array.isArray(typedUsers) ? typedUsers : typedUsers?.content || []);
-            setServices(Array.isArray(typedServices) ? typedServices : typedServices?.content || []);
+            setServices(allowedServices);
 
             if (appointmentData) {
                 setSelectedUserId(appointmentData.user?.id || '');
