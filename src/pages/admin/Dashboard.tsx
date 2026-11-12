@@ -69,9 +69,13 @@ export default function Dashboard() {
     const [totalClients, setTotalClients] = useState(0);
     const [totalServices, setTotalServices] = useState(0);
     const [revenueData, setRevenueData] = useState<RevenueResponse | null>(null);
-    const [nextAppointment, setNextAppointment] = useState<any>(null);
+    const [nextAppointment, setNextAppointment] = useState<AppointmentResponse | null>(null);
 
     const [periodFilter, setPeriodFilter] = useState<PeriodOption>('MONTH');
+
+    const [canceledAppointments, setCanceledAppointments] = useState(0);
+
+    const [pendingAppointments, setPendingAppointments] = useState(0);
 
     useEffect(() => {
         loadDashboardData();
@@ -90,21 +94,28 @@ export default function Dashboard() {
                 appointmentService.findAll(0, 100, 'startsAt,asc')
             ]);
 
-            console.log('1. Retorno bruto da API (/appointments):', appointmentsPage);
-
             setTotalClients(clientsData?.totalElements || 0);
             setTotalServices(servicesData?.length || 0);
             setRevenueData(statsData);
 
             const now = new Date();
-            const upcoming = appointmentsPage?.content?.find((apt: AppointmentResponse) => {
+            const futureAppointments = appointmentsPage?.content?.filter((apt: AppointmentResponse) => {
                 const aptDate = new Date(apt.startsAt);
                 return aptDate > now && apt.status !== 'CANCELED';
-            });
+            }) || [];
 
-            console.log('2. Próximo agendamento filtrado:', upcoming);
+            setNextAppointment(futureAppointments[0] || null);
 
-            setNextAppointment(upcoming || null);
+            setPendingAppointments(futureAppointments.length);
+
+            const canceledCount = appointmentsPage?.content?.filter((apt: AppointmentResponse) => {
+                if (apt.status !== 'CANCELED') return false;
+
+                const aptDateStr = apt.startsAt.split('T')[0]; // Pega apenas 'YYYY-MM-DD'
+                return aptDateStr >= startDate && aptDateStr <= endDate;
+            }).length || 0;
+
+            setCanceledAppointments(canceledCount);
         } catch (err) {
             console.error(err);
             setError('Não foi possível carregar os dados consolidados do dashboard.');
@@ -191,7 +202,7 @@ export default function Dashboard() {
                 {error && <div className="alert alert-danger py-2 mb-4">{error}</div>}
 
                 <div className="row g-3 mb-4">
-                    <div className="col-12 col-sm-6 col-xl-3">
+                    <div className="col-12 col-sm-6">
                         <div className="card border-0 shadow-sm p-3 bg-white rounded-3 h-100">
                             <div className="d-flex align-items-center justify-content-between">
                                 <div>
@@ -205,7 +216,7 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    <div className="col-12 col-sm-6 col-xl-3">
+                    <div className="col-12 col-sm-6">
                         <div className="card border-0 shadow-sm p-3 bg-white rounded-3 h-100">
                             <div className="d-flex align-items-center justify-content-between">
                                 <div>
@@ -237,6 +248,20 @@ export default function Dashboard() {
                         <div className="card border-0 shadow-sm p-3 bg-white rounded-3 h-100">
                             <div className="d-flex align-items-center justify-content-between">
                                 <div>
+                                    <span className="text-muted small fw-medium d-block mb-1">Agendamentos Cancelados</span>
+                                    <h3 className="m-0 fw-bold text-danger">{canceledAppointments}</h3>
+                                </div>
+                                <div className="p-3 bg-danger-subtle text-danger rounded-3 fs-4">
+                                    <i className="bi bi-calendar-x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="col-12 col-sm-6">
+                        <div className="card border-0 shadow-sm p-3 bg-white rounded-3 h-100">
+                            <div className="d-flex align-items-center justify-content-between">
+                                <div>
                                     <span className="text-muted small fw-medium d-block mb-1">Receita Total</span>
                                     <h3 className="m-0 fw-bold text-success">
                                         R$ {revenueData?.totalRevenue?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}
@@ -253,9 +278,17 @@ export default function Dashboard() {
                 <div className="row g-3">
                     <div className="col-12 col-lg-7">
                         <div className="card border-0 shadow-sm p-3 bg-white rounded-3 h-100">
-                            <h6 className="text-primary fw-bold mb-3">
-                                <i className="bi bi-clock-history me-2"></i> Próximo Agendamento Cadastrado
-                            </h6>
+                            <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                                <h6 className="text-primary fw-bold m-0">
+                                    <i className="bi bi-clock-history me-2"></i> Próximo Agendamento Cadastrado
+                                </h6>
+                                {pendingAppointments > 0 && (
+                                    <span className="text-muted small">
+                                        {pendingAppointments} {pendingAppointments === 1 ? 'agendamento pendente no total' : 'agendamentos pendentes no total'}
+                                    </span>
+                                )}
+                            </div>
+
                             {nextAppointment ? (
                                 <div className="p-3 bg-light rounded-3">
                                     <div className="d-flex justify-content-between align-items-start mb-2">
