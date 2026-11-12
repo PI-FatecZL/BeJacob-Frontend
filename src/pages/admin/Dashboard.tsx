@@ -4,6 +4,62 @@ import { userService } from '../../services/userService';
 import { serviceService } from '../../services/serviceService';
 import { statisticService } from '../../services/statisticService';
 import type { RevenueResponse } from '../../types/statistics';
+import { appointmentService } from '../../services/appointmentService';
+import type { AppointmentResponse } from '../../types/appointment';
+import Select, { type SelectOption } from "../../components/form/Select";
+
+type PeriodOption = 'ALL' | 'TODAY' | 'WEEK' | 'MONTH' | 'LAST_90_DAYS';
+
+const PERIOD_OPTIONS: SelectOption[] = [
+    { label: 'Todo o período', value: 'ALL' },
+    { label: 'Hoje', value: 'TODAY' },
+    { label: 'Esta semana', value: 'WEEK' },
+    { label: 'Este mês', value: 'MONTH' },
+    { label: 'Últimos 90 dias', value: 'LAST_90_DAYS' }
+];
+
+
+const formatISODate = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
+const getDateRange = (period: PeriodOption) => {
+    const now = new Date();
+    const endDate = formatISODate(now);
+    const start = new Date(now);
+
+    switch (period) {
+        case 'TODAY':
+            return { startDate: endDate, endDate };
+
+        case 'WEEK': {
+            // Início da semana atual (Domingo) até hoje
+            const dayOfWeek = now.getDay();
+            start.setDate(now.getDate() - dayOfWeek);
+            return { startDate: formatISODate(start), endDate };
+        }
+
+        case 'MONTH': {
+            // Primeiro dia do mês atual até hoje
+            start.setDate(1);
+            return { startDate: formatISODate(start), endDate };
+        }
+
+        case 'LAST_90_DAYS': {
+            // 90 dias atrás até hoje
+            start.setDate(now.getDate() - 90);
+            return { startDate: formatISODate(start), endDate };
+        }
+
+        case 'ALL':
+        default:
+            // Todo o período (data inicial bem antiga até hoje)
+            return { startDate: '2020-01-01', endDate };
+    }
+};
 
 export default function Dashboard() {
     const [loading, setLoading] = useState(true);
@@ -15,28 +71,40 @@ export default function Dashboard() {
     const [revenueData, setRevenueData] = useState<RevenueResponse | null>(null);
     const [nextAppointment, setNextAppointment] = useState<any>(null);
 
-    const startDate = '2026-01-01';
-    const endDate = '2026-11-10';
+    const [periodFilter, setPeriodFilter] = useState<PeriodOption>('MONTH');
 
     useEffect(() => {
         loadDashboardData();
-    }, []);
+    }, [periodFilter]);
 
     const loadDashboardData = async () => {
         setLoading(true);
         setError(null);
         try {
-            const [clientsData, servicesData, statsData] = await Promise.all([
+            const { startDate, endDate } = getDateRange(periodFilter);
+
+            const [clientsData, servicesData, statsData, appointmentsPage] = await Promise.all([
                 userService.findAll(),
                 serviceService.findAll(),
-                statisticService.getRevenue(startDate, endDate)
+                statisticService.getRevenue(startDate, endDate),
+                appointmentService.findAll(0, 100, 'startsAt,asc')
             ]);
+
+            console.log('1. Retorno bruto da API (/appointments):', appointmentsPage);
 
             setTotalClients(clientsData?.totalElements || 0);
             setTotalServices(servicesData?.length || 0);
             setRevenueData(statsData);
 
-            setNextAppointment(null);
+            const now = new Date();
+            const upcoming = appointmentsPage?.content?.find((apt: AppointmentResponse) => {
+                const aptDate = new Date(apt.startsAt);
+                return aptDate > now && apt.status !== 'CANCELED';
+            });
+
+            console.log('2. Próximo agendamento filtrado:', upcoming);
+
+            setNextAppointment(upcoming || null);
         } catch (err) {
             console.error(err);
             setError('Não foi possível carregar os dados consolidados do dashboard.');
@@ -48,6 +116,7 @@ export default function Dashboard() {
     const handleDownloadReport = async () => {
         setLoadingReport(true);
         try {
+            const { startDate, endDate } = getDateRange(periodFilter);
             await statisticService.downloadReport(startDate, endDate);
         } catch (err) {
             console.error(err);
@@ -59,7 +128,22 @@ export default function Dashboard() {
 
     const formatPaymentMethod = (method: string | null) => {
         if (!method) return 'Não Especificado';
-        return method.replace('_', ' ');
+
+        const paymentMap: Record<string, string> = {
+            PIX: 'PIX',
+            CREDIT: 'Cartão de Crédito',
+            DEBIT: 'Cartão de Débito',
+            CASH: 'Dinheiro'
+        };
+
+        // Normaliza para maiúsculo para evitar problemas caso venha em minúsculo
+        const normalized = method.toUpperCase();
+
+        // Retorna o nome traduzido ou formata automaticamente se não estiver no mapa
+        return paymentMap[normalized] || method
+            .toLowerCase()
+            .replace(/_/g, ' ')
+            .replace(/\b\w/g, (char) => char.toUpperCase());
     };
 
     if (loading) {
@@ -75,22 +159,33 @@ export default function Dashboard() {
 
     return (
         <DashboardLayout>
-            <div className="container-fluid p-0">
-                <div className="d-flex justify-content-between align-items-center mb-4">
+            <div className="container-fluid p-0 pb-5 mb-4">
+                <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
                     <h4 className="m-0 text-dark fw-bold">Visão Geral</h4>
 
-                    <button 
-                        className="btn btn-sm btn-outline-primary d-flex align-items-center gap-2"
-                        onClick={handleDownloadReport}
-                        disabled={loadingReport}
-                    >
-                        {loadingReport ? (
-                            <span className="spinner-border spinner-border-sm" role="status" />
-                        ) : (
-                            <i className="bi bi-file-earmark-pdf"></i>
-                        )}
-                        {loadingReport ? 'Gerando...' : 'Exportar PDF'}
-                    </button>
+                    <div className="d-flex align-items-center gap-2">
+                        <Select
+                            size="sm"
+                            margin="mb-0"
+                            placeholder=""
+                            options={PERIOD_OPTIONS}
+                            value={periodFilter}
+                            onChange={(e) => setPeriodFilter(e.target.value as PeriodOption)}
+                        />
+
+                        <button
+                            className="btn btn-sm btn-outline-primary d-flex align-items-center gap-2 text-nowrap"
+                            onClick={handleDownloadReport}
+                            disabled={loadingReport}
+                        >
+                            {loadingReport ? (
+                                <span className="spinner-border spinner-border-sm" role="status" />
+                            ) : (
+                                <i className="bi bi-file-earmark-pdf"></i>
+                            )}
+                            {loadingReport ? 'Gerando...' : 'Exportar PDF'}
+                        </button>
+                    </div>
                 </div>
 
                 {error && <div className="alert alert-danger py-2 mb-4">{error}</div>}
@@ -128,7 +223,7 @@ export default function Dashboard() {
                         <div className="card border-0 shadow-sm p-3 bg-white rounded-3 h-100">
                             <div className="d-flex align-items-center justify-content-between">
                                 <div>
-                                    <span className="text-muted small fw-medium d-block mb-1">Total de Atendimentos</span>
+                                    <span className="text-muted small fw-medium d-block mb-1">Agendamentos Concluídos</span>
                                     <h3 className="m-0 fw-bold text-dark">{revenueData?.totalAppointments || 0}</h3>
                                 </div>
                                 <div className="p-3 bg-info-subtle text-info rounded-3 fs-4">
@@ -164,11 +259,25 @@ export default function Dashboard() {
                             {nextAppointment ? (
                                 <div className="p-3 bg-light rounded-3">
                                     <div className="d-flex justify-content-between align-items-start mb-2">
-                                        <h5 className="m-0 fw-bold text-dark">{nextAppointment.clientName}</h5>
-                                        <span className="badge bg-primary">{nextAppointment.time}</span>
+                                        <h5 className="m-0 fw-bold text-dark">{nextAppointment.user.name}</h5>
+                                        <span className="badge bg-primary">
+                                            {new Date(nextAppointment.startsAt).toLocaleTimeString('pt-BR', {
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
+                                        </span>
                                     </div>
-                                    <p className="text-muted small mb-1"><strong>Serviço:</strong> {nextAppointment.serviceName}</p>
-                                    <p className="text-muted small mb-0"><strong>Data:</strong> {nextAppointment.date}</p>
+                                    <p className="text-muted small mb-1">
+                                        <strong>Serviço:</strong> {nextAppointment.service.name}
+                                    </p>
+                                    <p className="text-muted small mb-0">
+                                        <strong>Data:</strong>{' '}
+                                        {new Date(nextAppointment.startsAt).toLocaleDateString('pt-BR', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric'
+                                        })}
+                                    </p>
                                 </div>
                             ) : (
                                 <div className="text-center py-4 my-auto">
@@ -186,16 +295,16 @@ export default function Dashboard() {
                             {revenueData?.byPaymentMethod && revenueData.byPaymentMethod.length > 0 ? (
                                 <ul className="list-group list-group-flush small">
                                     {revenueData.byPaymentMethod.map((item, idx) => (
-                                        <li key={idx} className="list-group-item d-flex justify-content-between align-items-center px-0 bg-transparent">
-                                            <div>
-                                                <span className="text-dark fw-medium d-block">
+                                        <li key={idx} className="list-group-item d-flex justify-content-between align-items-center gap-2 px-0 bg-transparent">
+                                            <div className="text-truncate">
+                                                <span className="text-dark fw-medium d-block text-truncate">
                                                     {formatPaymentMethod(item.paymentMethod)}
                                                 </span>
                                                 <span className="text-muted small">
                                                     {item.appointments} {item.appointments === 1 ? 'atendimento' : 'atendimentos'}
                                                 </span>
                                             </div>
-                                            <span className="text-dark fw-bold">
+                                            <span className="text-dark fw-bold text-nowrap">
                                                 R$ {item.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                                             </span>
                                         </li>
