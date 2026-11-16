@@ -7,6 +7,7 @@ import type { RevenueResponse } from '../../types/statistics';
 import { appointmentService } from '../../services/appointmentService';
 import type { AppointmentResponse } from '../../types/appointment';
 import Select, { type SelectOption } from "../../components/form/Select";
+import { useNavigate } from 'react-router-dom';
 
 type PeriodOption = 'ALL' | 'TODAY' | 'WEEK' | 'MONTH' | 'LAST_90_DAYS';
 
@@ -80,6 +81,8 @@ export default function Dashboard() {
     useEffect(() => {
         loadDashboardData();
     }, [periodFilter]);
+
+    const navigate = useNavigate();
 
     const loadDashboardData = async () => {
         setLoading(true);
@@ -202,6 +205,91 @@ export default function Dashboard() {
                 {error && <div className="alert alert-danger py-2 mb-4">{error}</div>}
 
                 <div className="row g-3 mb-4">
+                    <div className="col-12 mb-4">
+                        <div className="d-flex align-items-center justify-content-between mb-2">
+                            <span className="text-muted small fw-bold text-uppercase tracking-wide">
+                                Acesso Rápido
+                            </span>
+                        </div>
+
+                        <div className="row g-3">
+                            <div className="col-12 col-md-4">
+                                <div
+                                    className="card border-0 shadow-sm p-3 bg-white rounded-3 h-100"
+                                    style={{ cursor: 'pointer', transition: 'transform 0.15s ease-in-out' }}
+                                    onClick={() => navigate('/admin/servicos')}
+                                    onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-3px)')}
+                                    onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
+                                >
+                                    <div className="d-flex align-items-center gap-3">
+                                        <div className="p-3 bg-primary-subtle text-primary rounded-3 fs-4 d-flex align-items-center justify-content-center">
+                                            <i className="bi bi-plus-circle-fill"></i>
+                                        </div>
+                                        <div className="flex-grow-1 overflow-hidden">
+                                            <h6 className="m-0 fw-bold text-dark text-truncate">
+                                                Novo Serviço
+                                            </h6>
+                                            <span className="text-muted small d-block text-truncate">
+                                                Cadastrar ou editar catálogo
+                                            </span>
+                                        </div>
+                                        <i className="bi bi-chevron-right text-muted"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="col-12 col-md-4">
+                                <div
+                                    className="card border-0 shadow-sm p-3 bg-white rounded-3 h-100"
+                                    style={{ cursor: 'pointer', transition: 'transform 0.15s ease-in-out' }}
+                                    onClick={() => navigate('/admin/agendamentos')}
+                                    onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-3px)')}
+                                    onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
+                                >
+                                    <div className="d-flex align-items-center gap-3">
+                                        <div className="p-3 bg-info-subtle text-info rounded-3 fs-4 d-flex align-items-center justify-content-center">
+                                            <i className="bi bi-calendar2-week-fill"></i>
+                                        </div>
+                                        <div className="flex-grow-1 overflow-hidden">
+                                            <h6 className="m-0 fw-bold text-dark text-truncate">
+                                                Agenda Completa
+                                            </h6>
+                                            <span className="text-muted small d-block text-truncate">
+                                                Gerenciar todos os horários
+                                            </span>
+                                        </div>
+                                        <i className="bi bi-chevron-right text-muted"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="col-12 col-md-4">
+                                <div
+                                    className="card border-0 shadow-sm p-3 bg-white rounded-3 h-100"
+                                    style={{ cursor: 'pointer', transition: 'transform 0.15s ease-in-out' }}
+                                    onClick={() => navigate('/admin/clientes')}
+                                    onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-3px)')}
+                                    onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
+                                >
+                                    <div className="d-flex align-items-center gap-3">
+                                        <div className="p-3 bg-success-subtle text-success rounded-3 fs-4 d-flex align-items-center justify-content-center">
+                                            <i className="bi bi-people-fill"></i>
+                                        </div>
+                                        <div className="flex-grow-1 overflow-hidden">
+                                            <h6 className="m-0 fw-bold text-dark text-truncate">
+                                                Base de Clientes
+                                            </h6>
+                                            <span className="text-muted small d-block text-truncate">
+                                                Consultar perfis e histórico
+                                            </span>
+                                        </div>
+                                        <i className="bi bi-chevron-right text-muted"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div className="col-12 col-sm-6">
                         <div className="card border-0 shadow-sm p-3 bg-white rounded-3 h-100">
                             <div className="d-flex align-items-center justify-content-between">

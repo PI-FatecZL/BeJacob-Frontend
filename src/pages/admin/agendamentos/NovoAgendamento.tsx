@@ -52,6 +52,8 @@ export default function NovoAgendamento() {
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | ''>('');
     const [notes, setNotes] = useState<string>('');
 
+    const [validated, setValidated] = useState(false);
+
     useEffect(() => {
         loadInitialData();
     }, []);
@@ -93,9 +95,9 @@ export default function NovoAgendamento() {
             });
 
             const rawServicesList: any[] = Array.isArray(typedServices) ? typedServices : typedServices?.content || [];
-            
+
             const allowedServices = rawServicesList.filter((s) => {
-                return s.active; 
+                return s.active;
             });
 
             setUsers(allowedUsers);
@@ -129,11 +131,15 @@ export default function NovoAgendamento() {
     };
 
     // função para cadastrar o agendamento como administrador
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        const formElement = e.currentTarget;
 
-        if (!selectedServiceId || !selectedDate || !selectedTime || !selectedPaymentMethod) {
-            setError('Por favor, preencha todos os campos obrigatórios.');
+        setValidated(true);
+
+        // Valida os campos nativos (Cliente, Serviço, Data, Pagamento) e o horário selecionado
+        if (!formElement.checkValidity() || !selectedTime) {
+            e.stopPropagation();
             return;
         }
 
@@ -150,7 +156,7 @@ export default function NovoAgendamento() {
                 startsAt,
                 notes,
                 status: 'SCHEDULED',
-                paymentMethod: selectedPaymentMethod
+                paymentMethod: selectedPaymentMethod as PaymentMethod
             });
 
             navigate('/admin/agendamentos');
@@ -197,7 +203,7 @@ export default function NovoAgendamento() {
                             <p className="text-muted small mt-2">Carregando informações...</p>
                         </div>
                     ) : (
-                        <form onSubmit={handleSubmit}>
+                        <form onSubmit={handleSubmit} noValidate className={validated ? "was-validated" : ""}>
                             <div className="row g-3">
                                 <div className="col-12">
                                     <Select
@@ -207,6 +213,7 @@ export default function NovoAgendamento() {
                                         onChange={(e) => setSelectedUserId(e.target.value ? Number(e.target.value) : "")}
                                         placeholder="Selecione um cliente..."
                                         options={userOptions}
+                                        errorFeedback="Selecione um cliente"
                                     />
                                 </div>
 
@@ -218,6 +225,7 @@ export default function NovoAgendamento() {
                                         onChange={(e) => setSelectedServiceId(e.target.value ? Number(e.target.value) : "")}
                                         placeholder="Selecione um serviço..."
                                         options={serviceOptions}
+                                        errorFeedback="Selecione um serviço"
                                     />
                                 </div>
 
@@ -229,6 +237,7 @@ export default function NovoAgendamento() {
                                         onChange={(e) => setSelectedDate(e.target.value)}
                                         min={getTodayDateString()}
                                         required
+                                        errorFeedback="Selecione uma data válida"
                                     />
                                 </div>
 
@@ -240,6 +249,7 @@ export default function NovoAgendamento() {
                                         onChange={(e) => setSelectedPaymentMethod(e.target.value as PaymentMethod | '')}
                                         placeholder="Selecione uma forma..."
                                         options={FORMAS_PAGAMENTO}
+                                        errorFeedback="Selecione a forma de pagamento"
                                     />
                                 </div>
 
@@ -287,6 +297,11 @@ export default function NovoAgendamento() {
                                             })}
                                         </div>
                                     )}
+                                    {validated && !selectedTime && availableTimes.length > 0 && (
+                                        <div className="invalid-feedback d-block mt-2">
+                                            Selecione um horário disponível para o atendimento.
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="col-12">
@@ -311,7 +326,7 @@ export default function NovoAgendamento() {
                                     <button
                                         type="submit"
                                         className="btn btn-primary px-4"
-                                        disabled={submitting || !selectedTime}
+                                        disabled={submitting}
                                     >
                                         {submitting ? (
                                             <>
@@ -322,6 +337,7 @@ export default function NovoAgendamento() {
                                             'Confirmar Agendamento'
                                         )}
                                     </button>
+
                                 </div>
                             </div>
                         </form>

@@ -9,7 +9,10 @@ interface TextAreaProps {
     required?: boolean;
     disabled?: boolean;
     rows?: number;
+    minLength?: number;
+    maxLength?: number;
     size?: "sm" | "lg" | string;
+    errorFeedback?: string;
 }
 
 export default function TextArea({
@@ -21,7 +24,10 @@ export default function TextArea({
     required = false,
     disabled = false,
     rows = 3,
+    minLength,
+    maxLength,
     size,
+    errorFeedback
 }: TextAreaProps) {
     const sizeClass = size === "sm" ? "form-control-sm" : size === "lg" ? "form-control-lg" : "";
 
@@ -36,7 +42,15 @@ export default function TextArea({
                 required={required}
                 disabled={disabled}
                 rows={rows}
+                minLength={minLength}
+                maxLength={maxLength}
             />
+
+            {errorFeedback && (
+                <div className="invalid-feedback text-start mt-1">
+                    {errorFeedback}
+                </div>
+            )}
         </div>
     );
 }

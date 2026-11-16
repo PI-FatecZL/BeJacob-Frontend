@@ -3,25 +3,25 @@ import type { ServiceRequest } from '../../../types/service';
 import Modal from '../../../components/ui/Modal';
 import Input from '../../../components/form/Input';
 import TextArea from '../../../components/form/TextArea';
-import Checkbox from '../../../components/form/Checkbox';
 
 interface CriarServicoProps {
     idModal: string;
     onSave: (data: ServiceRequest) => Promise<void>;
 }
 
-// Converte número em formato visual "1.250,50"
 const formatarParaMoeda = (valor: number | string): string => {
     const apenasNumeros = String(valor).replace(/\D/g, '');
     if (!apenasNumeros) return '';
+    
     const valorNumerico = Number(apenasNumeros) / 100;
+    if (valorNumerico === 0) return '';
+
     return valorNumerico.toLocaleString('pt-BR', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     });
 };
 
-// Converte string "1.250,50" de volta para number (1250.5)
 const converterParaNumero = (valorFormatado: string): number => {
     const apenasNumeros = valorFormatado.replace(/\D/g, '');
     return apenasNumeros ? Number(apenasNumeros) / 100 : 0;
@@ -35,15 +35,16 @@ export default function CriarServico({ idModal, onSave }: CriarServicoProps) {
         durationMinutes: 0,
         active: true,
     });
-    
-    // Estado para controlar a exibição do texto no input de preço
+
     const [precoExibicao, setPrecoExibicao] = useState('');
     const [loading, setLoading] = useState(false);
+
+    const [validated, setValidated] = useState(false);
 
     const handlePrecoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const textoDigitado = e.target.value;
         const textoFormatado = formatarParaMoeda(textoDigitado);
-        
+
         setPrecoExibicao(textoFormatado);
         setForm((prev) => ({
             ...prev,
@@ -51,22 +52,28 @@ export default function CriarServico({ idModal, onSave }: CriarServicoProps) {
         }));
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        
+        const formElement = e.currentTarget;
+
+        setValidated(true);
+
+        if (!formElement.checkValidity()) {
+            e.stopPropagation();
+            return;
+        }
+
         try {
             setLoading(true);
             await onSave(form);
-            
-            // Reseta o formulário e a exibição do preço
+
             setForm({ name: '', description: '', price: 0, durationMinutes: 0, active: true });
             setPrecoExibicao('');
+            setValidated(false);
 
-            // Fecha o modal
             const modalElement = document.getElementById(idModal);
             const closeBtn = modalElement?.querySelector<HTMLButtonElement>('[data-bs-dismiss="modal"]');
             closeBtn?.click();
-
         } catch (error) {
             console.error('Erro ao salvar serviço:', error);
         } finally {
@@ -76,7 +83,7 @@ export default function CriarServico({ idModal, onSave }: CriarServicoProps) {
 
     return (
         <Modal id={idModal} title="Novo Serviço">
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} noValidate className={validated ? "was-validated" : ""}>
                 <Input
                     label="Nome"
                     margin="mb-3"
@@ -84,6 +91,7 @@ export default function CriarServico({ idModal, onSave }: CriarServicoProps) {
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     required
+                    errorFeedback="Insira o nome do serviço"
                 />
 
                 <TextArea
@@ -104,38 +112,34 @@ export default function CriarServico({ idModal, onSave }: CriarServicoProps) {
                             value={precoExibicao}
                             onChange={handlePrecoChange}
                             required
+                            errorFeedback="Insira o preço para o serviço"
                         />
                     </div>
                     <div className="col-6">
                         <Input
                             label="Duração (min)"
                             type="number"
+                            min={1}
                             placeholder="60 minutos = 1 hora"
                             value={form.durationMinutes || ''}
                             onChange={(e) => setForm({ ...form, durationMinutes: Number(e.target.value) })}
                             required
+                            errorFeedback="Insira uma duração válida (mínimo 1 min)"
                         />
                     </div>
                 </div>
 
-                <Checkbox
-                    id="criarAtivoCheck"
-                    label="Ativo"
-                    checked={form.active}
-                    onChange={(e) => setForm({ ...form, active: e.target.checked })}
-                />
-
                 <div className="d-flex justify-content-end gap-2">
-                    <button 
-                        type="button" 
-                        className="btn btn-outline-secondary" 
+                    <button
+                        type="button"
+                        className="btn btn-outline-secondary"
                         data-bs-dismiss="modal"
                         disabled={loading}
                     >
                         Cancelar
                     </button>
-                    <button 
-                        type="submit" 
+                    <button
+                        type="submit"
                         className="btn btn-primary text-white"
                         disabled={loading}
                     >
