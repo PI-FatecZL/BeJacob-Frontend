@@ -16,6 +16,7 @@ import NovoAgendamento from '../pages/admin/agendamentos/NovoAgendamento';
 import EditarAgendamento from '../pages/admin/agendamentos/EditarAgendamento';
 import Notificacoes from '../pages/admin/Notificacoes';
 import Configuracoes from '../pages/admin/Configuracoes';
+import AlterarSenha from '../pages/auth/AlterarSenha';
 
 export default function AppRoutes() {
     return (
@@ -69,6 +70,15 @@ export default function AppRoutes() {
                 element={
                     <PrivateRoute>
                         <MinhaConta />
+                    </PrivateRoute>
+                }
+            />
+
+            <Route
+                path={"/alterar-senha"}
+                element={
+                    <PrivateRoute>
+                        <AlterarSenha />
                     </PrivateRoute>
                 }
             />
@@ -137,7 +147,7 @@ export default function AppRoutes() {
             />
 
             <Route
-                path={"/admin/agendamentos/editar/:id" }
+                path={"/admin/agendamentos/editar/:id"}
                 element={
                     <PrivateRoute requiredRole="ADMIN">
                         <EditarAgendamento />
