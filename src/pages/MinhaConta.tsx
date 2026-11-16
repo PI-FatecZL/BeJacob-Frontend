@@ -7,6 +7,8 @@ import type { UserResponse } from "../types/user";
 import type { AppointmentResponse } from "../types/appointment";
 import { appointmentService } from "../services/appointmentService";
 import Select from "../components/form/Select";
+import { userService } from "../services/userService";
+import { Modal } from "../components/ui/Modal";
 
 export default function MinhaConta() {
     const navigate = useNavigate();
@@ -27,6 +29,9 @@ export default function MinhaConta() {
     const [salvando, setSalvando] = useState<boolean>(false);
     const [erroEdicao, setErroEdicao] = useState<string>("");
     const [sucessoEdicao, setSucessoEdicao] = useState<string>("")
+    const [confirmText, setConfirmText] = useState<string>("");
+    const [excluindoConta, setExcluindoConta] = useState<boolean>(false);
+    const [erroExclusao, setErroExclusao] = useState<string>("");
 
     useEffect(() => {
         loadInitialData();
@@ -126,6 +131,34 @@ export default function MinhaConta() {
         navigate("/");
     };
 
+    const handleDeleteAccount = async () => {
+        if (!usuario || confirmText !== fraseConfirmacao) return;
+
+        setExcluindoConta(true);
+        setErroExclusao("");
+
+        try {
+            await userService.delete(usuario.id);
+
+            // Fecha o modal do Bootstrap antes de redirecionar
+            const modalElement = document.getElementById("modalExcluirConta");
+            const closeBtn = modalElement?.querySelector<HTMLButtonElement>('[data-bs-dismiss="modal"]');
+            closeBtn?.click();
+
+            authService.logout();
+            navigate("/");
+        } catch (error: any) {
+            console.error("Erro ao excluir conta:", error);
+            if (error?.response?.status === 409) {
+                setErroExclusao("Você possui agendamentos futuros pendentes. Cancele-os antes de excluir sua conta.");
+            } else {
+                setErroExclusao("Não foi possível excluir sua conta no momento. Tente novamente.");
+            }
+        } finally {
+            setExcluindoConta(false);
+        }
+    };
+
     const formatDateTime = (isoString: string) => {
         try {
             const date = new Date(isoString);
@@ -143,7 +176,6 @@ export default function MinhaConta() {
     };
 
     const agendamentosFiltrados = agendamentos.filter((appt) => {
-
         // filtro por status
         const matchesStatus = statusFilter === 'ALL' || appt.status === statusFilter;
 
@@ -202,6 +234,8 @@ export default function MinhaConta() {
         );
     }
 
+    const fraseConfirmacao = `eu, ${usuario.name}, desejo excluir minha conta`;
+
     return (
         <div className="d-flex flex-column min-vh-100">
             <Navbar />
@@ -220,8 +254,38 @@ export default function MinhaConta() {
                             </div>
                             <h5 className="fw-semibold mb-1">{usuario.name}</h5>
                             <p className="text-muted small mb-3">{usuario.email}</p>
-                            <button onClick={handleLogout} className="btn btn-outline-danger btn-sm w-100">
-                                Sair da Conta
+
+                            <div className="d-grid gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => navigate("/alterar-senha")}
+                                    className="btn btn-outline-secondary btn-sm"
+                                >
+                                    <i className="bi bi-key me-1"></i> Alterar Senha
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={handleLogout}
+                                    className="btn btn-outline-danger btn-sm"
+                                >
+                                    <i className="bi bi-box-arrow-right me-1"></i> Sair da Conta
+                                </button>
+                            </div>
+
+                            <hr className="my-3 text-muted opacity-25" />
+
+                            <button
+                                type="button"
+                                className="btn btn-link text-danger text-decoration-none btn-sm p-0"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modalExcluirConta"
+                                onClick={() => {
+                                    setConfirmText("");
+                                    setErroExclusao("");
+                                }}
+                            >
+                                <i className="bi bi-trash me-1"></i> Excluir minha conta
                             </button>
                         </div>
                     </div>
@@ -404,17 +468,49 @@ export default function MinhaConta() {
                 </div>
             </div>
             <Footer />
-            {/*
-            {modalAberto && (
-                <ModalNovoAgendamento
-                    nomeUsuario={usuario.name}
-                    servicos={SERVICOS_MOCK}
-                    horariosOcupados={horariosOcupados}
-                    onSalvar={handleSalvarAgendamento}
-                    onFechar={() => setModalAberto(false)}
-                />
-            )}
-            */}
+
+            <Modal id="modalExcluirConta" title="Excluir Conta">
+                <div>
+                    {erroExclusao && (
+                        <div className="alert alert-danger py-2 small mb-3">
+                            {erroExclusao}
+                        </div>
+                    )}
+
+                    <p className="text-muted mb-3">
+                        Esta ação excluirá permanentemente o seu acesso e histórico na plataforma.
+                        Para confirmar, digite <strong>{fraseConfirmacao}</strong> no campo abaixo:
+                    </p>
+
+                    <input
+                        type="text"
+                        className="form-control mb-3"
+                        placeholder=""
+                        value={confirmText}
+                        onChange={(e) => setConfirmText(e.target.value)}
+                        disabled={excluindoConta}
+                    />
+
+                    <div className="d-flex justify-content-end gap-2">
+                        <button
+                            type="button"
+                            className="btn btn-outline-secondary btn-sm"
+                            data-bs-dismiss="modal"
+                            disabled={excluindoConta}
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="button"
+                            className="btn btn-danger btn-sm"
+                            onClick={handleDeleteAccount}
+                            disabled={confirmText !== fraseConfirmacao || excluindoConta}
+                        >
+                            {excluindoConta ? "Excluindo..." : "Confirmar Exclusão"}
+                        </button>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 }
