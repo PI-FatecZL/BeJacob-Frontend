@@ -13,13 +13,13 @@ interface InputProps {
     disabled?: boolean;
     placeholder?: string;
     size?: "sm" | "lg" | string;
-    pattern?: string;      // Adicionado para suportar validação com Regex (ex: telefone)
-    errorFeedback?: string; // Nova propriedade para a mensagem de erro customizada
+    pattern?: string;      
+    errorFeedback?: string;
 }
 
 export default function Input({
     label,
-    margin = "mb-3", // Definido uma margem padrão caso não envie nenhuma
+    margin = "mb-3", 
     type = "text",
     value,
     onChange,
@@ -50,10 +50,9 @@ export default function Input({
                 required={required}
                 disabled={disabled}
                 placeholder={placeholder}
-                pattern={pattern} // Repassa o pattern para a tag nativa
+                pattern={pattern} 
             />
 
-            {/* Se houver um texto de feedback, ele renderiza colado abaixo do input */}
             {errorFeedback && (
                 <div className="invalid-feedback text-start mt-1">
                     {errorFeedback}

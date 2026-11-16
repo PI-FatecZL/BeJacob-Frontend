@@ -238,7 +238,6 @@ export default function Dashboard() {
                                 </div>
                             </div>
 
-                            {/* Ação 2: Agendamentos */}
                             <div className="col-12 col-md-4">
                                 <div
                                     className="card border-0 shadow-sm p-3 bg-white rounded-3 h-100"
@@ -264,7 +263,6 @@ export default function Dashboard() {
                                 </div>
                             </div>
 
-                            {/* Ação 3: Clientes */}
                             <div className="col-12 col-md-4">
                                 <div
                                     className="card border-0 shadow-sm p-3 bg-white rounded-3 h-100"

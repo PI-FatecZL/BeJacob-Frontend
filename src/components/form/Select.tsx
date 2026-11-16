@@ -15,6 +15,7 @@ interface SelectProps {
     required?: boolean;
     disabled?: boolean;
     size?: "sm" | "lg" | string;
+    errorFeedback?: string;
 }
 
 export default function Select({
@@ -26,7 +27,8 @@ export default function Select({
     placeholder = "Selecione...",
     required = false,
     disabled = false,
-    size
+    size,
+    errorFeedback
 }: SelectProps) {
     const sizeClass = size === "sm" ? "form-select-sm" : size === "lg" ? "form-select-lg" : "";
 
@@ -55,6 +57,12 @@ export default function Select({
                     </option>
                 ))}
             </select>
+
+            {errorFeedback && (
+                <div className="invalid-feedback text-start mt-1">
+                    {errorFeedback}
+                </div>
+            )}
         </div>
     );
 }

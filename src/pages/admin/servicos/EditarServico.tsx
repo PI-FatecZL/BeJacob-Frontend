@@ -10,18 +10,19 @@ interface EditarServicoProps {
     onSave: (data: ServiceRequest) => Promise<void>;
 }
 
-// Converte número em formato visual "1.250,50"
 const formatarParaMoeda = (valor: number | string): string => {
     const apenasNumeros = String(valor).replace(/\D/g, '');
     if (!apenasNumeros) return '';
+
     const valorNumerico = Number(apenasNumeros) / 100;
+    if (valorNumerico === 0) return '';
+
     return valorNumerico.toLocaleString('pt-BR', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     });
 };
 
-// Converte string "1.250,50" para number (1250.5)
 const converterParaNumero = (valorFormatado: string): number => {
     const apenasNumeros = valorFormatado.replace(/\D/g, '');
     return apenasNumeros ? Number(apenasNumeros) / 100 : 0;
@@ -39,6 +40,8 @@ export default function EditarServico({ idModal, service, onSave }: EditarServic
     const [precoExibicao, setPrecoExibicao] = useState('');
     const [loading, setLoading] = useState(false);
 
+    const [validated, setValidated] = useState(false);
+
     useEffect(() => {
         if (service) {
             setForm({
@@ -48,8 +51,9 @@ export default function EditarServico({ idModal, service, onSave }: EditarServic
                 durationMinutes: service.durationMinutes,
                 active: service.active,
             });
-            // Converte o preço numérico do serviço carregado para a exibição formatada
+
             setPrecoExibicao(formatarParaMoeda(Math.round(service.price * 100)));
+            setValidated(false); // Limpa erros visuais de edições anteriores
         }
     }, [service]);
 
@@ -64,14 +68,23 @@ export default function EditarServico({ idModal, service, onSave }: EditarServic
         }));
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        const formElement = e.currentTarget;
+
+        setValidated(true);
+
+        if (!formElement.checkValidity()) {
+            e.stopPropagation();
+            return;
+        }
 
         try {
             setLoading(true);
             await onSave(form);
+            setValidated(false);
 
-            // Fecha o modal via JS apenas após o formulário ser validado e o salvamento concluído com sucesso
             const modalElement = document.getElementById(idModal);
             const closeBtn = modalElement?.querySelector<HTMLButtonElement>('[data-bs-dismiss="modal"]');
             closeBtn?.click();
@@ -84,13 +97,14 @@ export default function EditarServico({ idModal, service, onSave }: EditarServic
 
     return (
         <Modal id={idModal} title="Editar Serviço">
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} noValidate className={validated ? "was-validated" : ""}>
                 <Input
                     label="Nome"
                     margin="mb-3"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     required
+                    errorFeedback="Insira o nome do serviço"
                 />
 
                 <TextArea
@@ -110,15 +124,18 @@ export default function EditarServico({ idModal, service, onSave }: EditarServic
                             value={precoExibicao}
                             onChange={handlePrecoChange}
                             required
+                            errorFeedback="Insira o preço para o serviço"
                         />
                     </div>
                     <div className="col-6">
                         <Input
                             label="Duração (min)"
                             type="number"
+                            min={1}
                             value={form.durationMinutes || ''}
                             onChange={(e) => setForm({ ...form, durationMinutes: Number(e.target.value) })}
                             required
+                            errorFeedback="Insira uma duração válida (mínimo 1 min)"
                         />
                     </div>
                 </div>

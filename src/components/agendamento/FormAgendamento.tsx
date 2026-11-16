@@ -42,6 +42,8 @@ export default function FormAgendamento() {
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | ''>('');
     const [notes, setNotes] = useState<string>('');
 
+    const [validated, setValidated] = useState(false);
+
     useEffect(() => {
         loadInitialData();
     }, []);
@@ -66,9 +68,9 @@ export default function FormAgendamento() {
             const typedServices = servicesData as any;
 
             const rawServicesList: any[] = Array.isArray(typedServices) ? typedServices : typedServices?.content || [];
-            
+
             const allowedServices = rawServicesList.filter((s) => {
-                return s.active; 
+                return s.active;
             });
 
             setServices(allowedServices);
@@ -101,11 +103,15 @@ export default function FormAgendamento() {
     };
 
     // função para cadastrar o agendamento como administrador
-    const handleSubmit = async (e: React.FormEvent) => {
+    // função para cadastrar o agendamento
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        const formElement = e.currentTarget;
 
-        if (!selectedServiceId || !selectedDate || !selectedTime || !selectedPaymentMethod) {
-            setError('Por favor, preencha todos os campos obrigatórios.');
+        setValidated(true);
+
+        if (!formElement.checkValidity() || !selectedTime) {
+            e.stopPropagation();
             return;
         }
 
@@ -120,7 +126,7 @@ export default function FormAgendamento() {
                 serviceId: Number(selectedServiceId),
                 startsAt,
                 notes,
-                paymentMethod: selectedPaymentMethod
+                paymentMethod: selectedPaymentMethod as PaymentMethod
             });
 
             navigate('/minha-conta');
@@ -150,7 +156,7 @@ export default function FormAgendamento() {
                     <p className="text-muted small mt-2">Carregando informações...</p>
                 </div>
             ) : (
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} noValidate className={validated ? "was-validated" : ""}>
                     <div className="row g-3">
                         <div className="col-12 col-md-6">
                             <Select
@@ -160,6 +166,7 @@ export default function FormAgendamento() {
                                 onChange={(e) => setSelectedServiceId(e.target.value ? Number(e.target.value) : "")}
                                 placeholder="Selecione um serviço..."
                                 options={serviceOptions}
+                                errorFeedback="Selecione um serviço"
                             />
                         </div>
 
@@ -171,6 +178,7 @@ export default function FormAgendamento() {
                                 onChange={(e) => setSelectedDate(e.target.value)}
                                 min={getTodayDateString()}
                                 required
+                                errorFeedback="Selecione uma data válida"
                             />
                         </div>
 
@@ -182,6 +190,7 @@ export default function FormAgendamento() {
                                 onChange={(e) => setSelectedPaymentMethod(e.target.value as PaymentMethod | '')}
                                 placeholder="Selecione uma forma..."
                                 options={FORMAS_PAGAMENTO}
+                                errorFeedback="Selecione a forma de pagamento"
                             />
                         </div>
 
@@ -229,6 +238,12 @@ export default function FormAgendamento() {
                                     })}
                                 </div>
                             )}
+                            {validated && !selectedTime && availableTimes.length > 0 && (
+                                <div className="invalid-feedback d-block mt-2">
+                                    Selecione um horário disponível para o atendimento.
+                                </div>
+                            )}
+
                         </div>
 
                         <div className="col-12">
@@ -253,7 +268,7 @@ export default function FormAgendamento() {
                             <button
                                 type="submit"
                                 className="btn btn-primary px-4"
-                                disabled={submitting || !selectedTime}
+                                disabled={submitting}
                             >
                                 {submitting ? (
                                     <>
