@@ -59,12 +59,10 @@ export default function Clientes() {
 
     // função para filtrar usuário
     const filteredUsers = usersList.filter((u) => {
-        // 1. Remove o usuário logado
         if (loggedUserId && String(u.id) === loggedUserId) {
             return false;
         }
 
-        // 2. Aplica o filtro do Select (Ativos / Inativos)
         if (statusFilter === 'ativos' && !u.isActive) {
             return false;
         }
@@ -72,7 +70,6 @@ export default function Clientes() {
             return false;
         }
 
-        // 3. Aplica o filtro do termo de busca
         if (!term) return true;
         return u.name.toLowerCase().includes(term);
     });
@@ -109,7 +106,6 @@ export default function Clientes() {
         { label: 'Inativos', value: 'inativos' }
     ];
 
-
     return (
         <DashboardLayout>
             <div className="bg-white rounded-3 shadow-sm">
@@ -139,7 +135,7 @@ export default function Clientes() {
 
                         <Select
                             size="sm"
-                            placeholder="" // Deixamos vazio para não exibir o "Selecione..." padrão
+                            placeholder=""
                             value={statusFilter}
                             options={statusOptions}
                             onChange={(e) => setStatusFilter(e.target.value as any)}

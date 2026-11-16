@@ -14,3 +14,11 @@ export interface ServiceResponse {
     price: number;
     active: boolean;
 }
+
+export interface UpdateServiceRequest {
+    name: string;
+    description: string;
+    durationMinutes: number;
+    price: number;
+    active: boolean;
+}

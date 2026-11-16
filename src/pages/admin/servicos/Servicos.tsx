@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import DashboardLayout from "../../../components/layout/DashboardLayout";
 import { serviceService } from '../../../services/serviceService';
-import type { ServiceResponse as Service, ServiceRequest } from '../../../types/service';
+import type { ServiceResponse as Service, ServiceRequest, UpdateServiceRequest } from '../../../types/service';
+import Select from '../../../components/form/Select';
 
 import CriarServico from './CriarServico';
 import EditarServico from './EditarServico';
@@ -14,6 +15,13 @@ export default function Servicos() {
     const [search, setSearch] = useState('');
 
     const [selectedService, setSelectedService] = useState<Service | null>(null);
+
+    const [statusFilter, setStatusFilter] = useState<'ativos' | 'inativos'>('ativos');
+
+    const statusOptions = [
+        { label: 'Ativos', value: 'ativos' },
+        { label: 'Inativos', value: 'inativos' }
+    ];
 
     useEffect(() => {
         loadServices();
@@ -34,8 +42,15 @@ export default function Servicos() {
         }
     };
 
-    // função para filtrar os serviços com base na busca
+    // função para filtrar os serviços com base no status e na busca
     const filteredServices = services.filter((s) => {
+        if (statusFilter === 'ativos' && !s.active) {
+            return false;
+        }
+        if (statusFilter === 'inativos' && s.active) {
+            return false;
+        }
+
         const term = search.trim().toLowerCase();
         if (!term) return true;
         return (
@@ -56,7 +71,7 @@ export default function Servicos() {
     };
 
     // função para editar um serviço existente
-    const handleEditService = async (data: ServiceRequest) => {
+    const handleEditService = async (data: UpdateServiceRequest) => {
         if (!selectedService) return;
         setError(null);
         try {
@@ -71,15 +86,52 @@ export default function Servicos() {
         }
     };
 
-    // função para excluir um serviço
+    // função para inativar (soft delete) um serviço
     const handleDeleteService = async () => {
         if (!selectedService) return;
         setError(null);
         try {
-            await serviceService.delete(selectedService.id);
-            setServices((prev) => prev.filter((s) => s.id !== selectedService.id));
+            const payload: UpdateServiceRequest = {
+                name: selectedService.name,
+                description: selectedService.description,
+                price: selectedService.price,
+                durationMinutes: selectedService.durationMinutes,
+                active: false,
+            };
+
+            const updated = await serviceService.update(selectedService.id, payload);
+
+            setServices((prev) =>
+                prev.map((s) =>
+                    s.id === selectedService.id ? { ...s, ...updated, active: false } : s
+                )
+            );
         } catch {
-            setError('Não foi possível excluir o serviço.');
+            setError('Não foi possível inativar o serviço.');
+        }
+    };
+
+    const handleReactiveService = async () => {
+        if (!selectedService) return;
+        setError(null);
+        try {
+            const payload: UpdateServiceRequest = {
+                name: selectedService.name,
+                description: selectedService.description,
+                price: selectedService.price,
+                durationMinutes: selectedService.durationMinutes,
+                active: true,
+            };
+
+            const updated = await serviceService.update(selectedService.id, payload);
+
+            setServices((prev) =>
+                prev.map((s) =>
+                    s.id === selectedService.id ? { ...s, ...updated, active: true } : s
+                )
+            );
+        } catch {
+            setError('Não foi possível reativar o serviço.');
         }
     };
 
@@ -124,7 +176,7 @@ export default function Servicos() {
                 <div className="p-3">
                     {error && <div className="alert alert-danger py-2">{error}</div>}
 
-                    <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                    <div className="d-flex flex-wrap align-items-center gap-2 mb-3">
                         <div className="input-group input-group-sm" style={{ maxWidth: '280px' }}>
                             <span className="input-group-text bg-white">
                                 <i className="bi bi-search"></i>
@@ -137,6 +189,14 @@ export default function Servicos() {
                                 onChange={(e) => setSearch(e.target.value)}
                             />
                         </div>
+
+                        <Select
+                            size="sm"
+                            placeholder=""
+                            value={statusFilter}
+                            options={statusOptions}
+                            onChange={(e) => setStatusFilter(e.target.value as 'ativos' | 'inativos')}
+                        />
                     </div>
 
                     {loading ? (
@@ -158,7 +218,6 @@ export default function Servicos() {
                                         <th>Descrição</th>
                                         <th>Preço</th>
                                         <th>Duração</th>
-                                        <th>Status</th>
                                         <th className="text-end">Ações</th>
                                     </tr>
                                 </thead>
@@ -174,30 +233,39 @@ export default function Servicos() {
                                                 })}
                                             </td>
                                             <td>{formatDuration(s.durationMinutes)}</td>
-                                            <td>
-                                                <span className={`badge ${s.active ? 'bg-success' : 'bg-secondary'}`}>
-                                                    {s.active ? 'Ativo' : 'Inativo'}
-                                                </span>
-                                            </td>
                                             <td className="text-end">
-                                                <button
-                                                    className="btn btn-sm btn-outline-warning me-2"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#modalEditarServico"
-                                                    onClick={() => setSelectedService(s)}
-                                                    title="Editar"
-                                                >
-                                                    <i className="bi bi-pencil"></i>
-                                                </button>
-                                                <button
-                                                    className="btn btn-sm btn-outline-danger"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#modalExcluirServico"
-                                                    onClick={() => setSelectedService(s)}
-                                                    title="Excluir"
-                                                >
-                                                    <i className="bi bi-trash"></i>
-                                                </button>
+                                                {s.active ? (
+                                                    <>
+                                                        <button
+                                                            className="btn btn-sm btn-outline-warning me-2"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#modalEditarServico"
+                                                            onClick={() => setSelectedService(s)}
+                                                            title="Editar"
+                                                        >
+                                                            <i className="bi bi-pencil"></i>
+                                                        </button>
+                                                        <button
+                                                            className="btn btn-sm btn-outline-danger"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#modalExcluirServico"
+                                                            onClick={() => setSelectedService(s)}
+                                                            title="Excluir"
+                                                        >
+                                                            <i className="bi bi-trash"></i>
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <button
+                                                        className="btn btn-sm btn-outline-warning"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modalReativarUsuario"
+                                                        onClick={() => setSelectedService(s)}
+                                                        title="Reativar"
+                                                    >
+                                                        <i className="bi bi-arrow-counterclockwise"></i>
+                                                    </button>
+                                                )}
                                             </td>
                                         </tr>
                                     ))}
@@ -224,15 +292,28 @@ export default function Servicos() {
             {/* Modal de Confirmação para Exclusão */}
             <ModalConfirmacao
                 id="modalExcluirServico"
-                titulo="Confirmar Exclusão"
+                titulo="Confirmar Desativação"
                 descricao={
                     <>
-                        Tem certeza que deseja excluir o serviço{' '}
+                        Tem certeza que deseja desativar o serviço{' '}
                         <strong>{selectedService?.name}</strong>?
                     </>
                 }
                 tipo="danger"
                 onConfirmar={handleDeleteService}
+            />
+
+            <ModalConfirmacao
+                id="modalReativarUsuario"
+                titulo="Confirmar Reativação"
+                descricao={
+                    <>
+                        Tem certeza que deseja reativar o serviço{' '}
+                        <strong>{selectedService?.name}</strong>?
+                    </>
+                }
+                tipo="warning"
+                onConfirmar={handleReactiveService}
             />
         </DashboardLayout>
     );
