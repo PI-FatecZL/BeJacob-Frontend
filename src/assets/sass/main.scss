@@ -1,11 +1,49 @@
-// bootstrap 5
-@use "../../../node_modules/bootstrap/scss/bootstrap";
+// paleta de cores personalizada do projeto
+$primary: #4F694F;
+$secondary: #586949;
+$success: #869C77;
+$info: #232E22;
+$warning: #C5A059;
+$body: #FAF9F5;
+
+$font-sizes: (
+  1: 2.5rem,
+  2: 2rem,
+  3: 1.75rem,
+  4: 1.5rem,
+  5: 1.25rem,
+  6: 1rem,
+  7: 0.8rem
+);
+
+$letter-spacing: (
+  1: 0.15em,
+  2: 0.1em,
+  3: 0.05em,
+  4: 0,
+  5: -0.02em,
+  6: -0.05em
+);
+
+@import '../../../node_modules/bootstrap/scss/functions';
+@import '../../../node_modules/bootstrap/scss/variables';
+@import '../../../node_modules/bootstrap/scss/maps';
+@import '../../../node_modules/bootstrap/scss/mixins';
+@import '../../../node_modules/bootstrap/scss/utilities';
+
+$utilities: map-merge($utilities,
+    ("letter-spacing": (property: letter-spacing,
+        class: ls,
+        values: $letter-spacing )));
 
 // cormorant garamond
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&display=swap');@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&display=swap');
 
 // dm sans
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+
+// bootstrap 5
+@import '../../../node_modules/bootstrap/scss/bootstrap.scss';
 
 body {
   background-color: #FAF9F5;
@@ -13,5 +51,68 @@ body {
 }
 
 .cormorant-garamond-font {
-    font-family: 'Cormorant Garamond', serif;
+  font-family: 'Cormorant Garamond', serif;
+}
+
+.text-justify {
+  text-align: justify;
+}
+
+/* --- FILTROS PARA DALTONISMO --- */
+[data-theme="protanopia"] {
+  filter: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"><filter id="f"><feColorMatrix type="matrix" values="0.567,0.433,0,0,0 0.558,0.442,0,0,0 0,0.242,0.758,0,0 0,0,0,1,0"/></filter></svg>#f');
+}
+
+[data-theme="deuteranopia"] {
+  filter: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"><filter id="f"><feColorMatrix type="matrix" values="0.625,0.375,0,0,0 0.7,0.3,0,0,0 0,0.3,0.7,0,0 0,0,0,1,0"/></filter></svg>#f');
+}
+
+[data-theme="tritanopia"] {
+  filter: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"><filter id="f"><feColorMatrix type="matrix" values="0.95,0.05,0,0,0 0,0.433,0.567,0,0 0,0.475,0.525,0,0 0,0,0,1,0"/></filter></svg>#f');
+}
+
+// estilos do hero
+.hero-section {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  background: url('/hero-image.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.auth-banner-bg {
+  position: relative;
+  min-height: 100vh;
+  background: url('/hero-image.png') no-repeat center center;
+  background-size: cover;
+  background-blend-mode: overlay;
+  background-color: rgba(0, 0, 0, 0.300); 
+}
+
+@keyframes bounce {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(5px);
+  }
+}
+
+.animate-bounce {
+  animation: bounce 2s infinite;
+}
+
+// customização do estado de foco dos inputs do sistema
+.input-custom-focus:focus {
+  border-color: #4F694F !important;
+  outline: 0 !important;
+}
+
+@media (min-width: 768px) { 
+  .bg-md-white { background-color: #fff !important; } 
 }
