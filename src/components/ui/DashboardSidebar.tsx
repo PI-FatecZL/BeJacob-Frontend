@@ -143,8 +143,8 @@ export default function DashboardSidebar() {
                             aria-labelledby="dropdownUser1"
                         >
                             <li>
-                                <Link className="dropdown-item" to="/admin/configuracoes">
-                                    Configurações
+                                <Link className="dropdown-item" to="/admin/meu-perfil">
+                                    Meu Perfil
                                 </Link>
                             </li>
 
@@ -269,8 +269,8 @@ export default function DashboardSidebar() {
                             aria-labelledby="dropdownUserMobile"
                         >
                             <li>
-                                <Link className="dropdown-item" to="/admin/configuracoes">
-                                    Configurações
+                                <Link className="dropdown-item" to="/admin/meu-perfil">
+                                    Meu Perfil
                                 </Link>
                             </li>
 

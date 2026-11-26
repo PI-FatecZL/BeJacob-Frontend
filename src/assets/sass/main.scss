@@ -116,3 +116,34 @@ body {
 @media (min-width: 768px) { 
   .bg-md-white { background-color: #fff !important; } 
 }
+
+.services-control {
+    width: 50px;
+    height: 50px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    opacity: 1;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+    
+    top: 50%;
+    transform: translateY(-50%);
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.services-control i {
+    color: #198754;
+    line-height: 1;
+}
+
+.services-control:hover {
+    background-color: #f8f9fa;
+    opacity: 1;
+}
+
+.services-control:hover i {
+    color: #157347;
+}

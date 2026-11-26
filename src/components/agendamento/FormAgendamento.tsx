@@ -102,7 +102,6 @@ export default function FormAgendamento() {
         return timeString.substring(0, 5);
     };
 
-    // função para cadastrar o agendamento como administrador
     // função para cadastrar o agendamento
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
