@@ -9,63 +9,112 @@ export default function LandingPage() {
     const services = [
         {
             id: 1,
-            title: "Micropigmentação Labial",
-            description: "Técnicas avançadas para devolver simetria, cor natural e harmonia aos lábios.",
-            price: "R$ 450,00",
-            duration: "2h 30min",
-            maintenance: "30 a 45 dias",
-            image: "/galeria/img-galeria4.webp"
+            title: "Volume Luxo (Russo Tecnológico)",
+            description: "Técnica volumosa impactante com múltiplos fios leves, ideal para quem busca cílios cheios e expressivos, sem perder a leveza. Perfeito para clientes que gostam de destaque e sofisticação no olhar.",
+            price: "R$ 160,00",
+            duration: "1h a 2h",
+            maintenance: "R$ 120,00 até 25 dias",
+            image: "/servicos/volume-russo.webp"
         },
         {
             id: 2,
-            title: "Micropigmentação de Sobrancelhas",
-            description:
-                "Realce o formato das sobrancelhas com técnicas personalizadas e naturais.",
-            price: "R$ 450,00",
-            duration: "2h 30min",
-            maintenance: "30 a 45 dias",
-            image: "/galeria/img-galeria3.webp"
+            title: "Brasileiro",
+            description: "Os Cílios em Y, são ideais para construir volume moderado na extensão de cílios, nem exagerado, nem tão discreto, o ideal para quem deseja um visual mais equilibrado.",
+            price: "R$ 120,00",
+            duration: "1h a 2h",
+            maintenance: "R$ 90,00 até 20 dias",
+            image: "/servicos/brasileiro.webp"
         },
         {
             id: 3,
-            title: "Design de Sobrancelhas",
-            description:
-                "Design personalizado para valorizar a simetria e a harmonia do rosto.",
-            price: "R$ 450,00",
-            duration: "2h 30min",
-            maintenance: "30 a 45 dias",
-            image: "/galeria/img-galeria2.webp"
+            title: "Fox Eyes",
+            description: "Técnica com fios alongados no canto externo, criando um efeito de olhar puxado e elegante. Realça a expressão com sensualidade e definição, perfeito para quem busca um estilo marcante e moderno.",
+            price: "R$ 160,00",
+            duration: "1h a 2h",
+            maintenance: "R$ 120,00 até 25 dias",
+            image: "/servicos/fox-eyes.webp"
         },
         {
             id: 4,
-            title: "Lash Lifting",
-            description:
-                "Realce os cílios naturais proporcionando curvatura e definição.",
-            price: "R$ 450,00",
-            duration: "2h 30min",
-            maintenance: "30 a 45 dias",
-            image: "/galeria/img-galeria1.webp"
+            title: "Volume Egípcio",
+            description: "Alongamento com efeito arqueado, que levanta o olhar e valoriza os cílios externos. Traz um resultado sensual, elegante e marcante, ideal para clientes que buscam um olhar mais poderoso e definido.",
+            price: "R$ 140,00",
+            duration: "1h a 2h",
+            maintenance: "R$ 110,00 até 25 dias",
+            image: "/servicos/volume-egipcio.webp"
         },
         {
             id: 5,
-            title: "Henna",
-            description:
-                "Técnica para preencher e definir as sobrancelhas de maneira natural.",
-            price: "R$ 450,00",
-            duration: "2h 30min",
-            maintenance: "30 a 45 dias",
-            image: "/galeria/img-galeria2.webp"
+            title: "Fio a Fio",
+            description: "Uma técnica delicada e natural para os seus olhos, personalizável e duradoura, essa técnica garante conforto e beleza, realçando o olhar de forma sutil e discreta. Ideal para quem deseja cílios mais definidos sem exagero!",
+            price: "R$ 120,00",
+            duration: "1h a 2h",
+            maintenance: "R$ 90,00 até 15 dias",
+            image: "/servicos/fio-a-fio.webp"
         },
         {
             id: 6,
-            title: "Extensão de cílios",
-            description:
-                "Técnica para preencher e definir os cílios de maneira natural.",
-            price: "R$ 450,00",
-            duration: "2h 30min",
-            maintenance: "30 a 45 dias",
-            image: "/galeria/img-galeria3.webp"
-        }
+            title: "Efeito Sirena",
+            description: "O efeito Sirena é uma técnica que alonga e valoriza o formato dos olhos, criando um visual sofisticado, leve e cheio de personalidade. Sua principal característica é o início dos cílios menos preenchidos, proporcionando uma transição delicada e um efeito mais alongado e misterioso ao olhar.",
+            price: "R$ 120,00",
+            duration: "1h a 2h",
+            maintenance: "Sem manutenção",
+            image: "/servicos/efeito-sirena.webp"
+        },
+        {
+            id: 7,
+            title: "Efeito Malibu",
+            description: "É a escolha perfeita para quem deseja um olhar mais destacado e moderno. Com um acabamento sofisticado, essa técnica com dois tipos de fios entrega um resultado marcante na medida certa, valorizando a beleza com um toque charmoso, único e cheio de personalidade.",
+            price: "R$ 160,00",
+            duration: "1h a 2h",
+            maintenance: "R$ 120,00 até 20 dias",
+            image: "/servicos/efeito-malibu.webp"
+        },
+        {
+            id: 8,
+            title: "Mangá Lashes",
+            description: "O Mangá Lashes é uma técnica inspirada no olhar das personagens dos animes, criando um efeito marcante, delicado e cheio de personalidade. O resultado é um olhar expressivo, moderno e encantador, com um acabamento único que destaca os olhos de forma leve e sofisticada.",
+            price: "R$ 150,00",
+            duration: "1h a 2h",
+            maintenance: "R$ 100,00 até 20 dias",
+            image: "/servicos/manga-lashes.webp"
+        },
+        {
+            id: 9,
+            title: "Design Simples",
+            description: "É a remodelação do desenho natural das sobrancelhas para valorizar o olhar e o rosto. A famosa “limpeza”, com visagismo.",
+            price: "R$ 30,00",
+            duration: "20 min",
+            maintenance: "Quando necessário",
+            image: "/servicos/design-simples.webp"
+        },
+        {
+            id: 10,
+            title: "Design com Henna",
+            description: "É uma técnica que combina a modelagem das sobrancelhas com a aplicação de henna, para preencher falhas, realçar os fios e definir o formato. O objetivo é valorizar o olhar e trazer mais definição e harmonia ao rosto",
+            price: "R$ 40,00",
+            duration: "40 min",
+            maintenance: "Quando necessário",
+            image: "/servicos/henna.webp"
+        },
+        {
+            id: 11,
+            title: "Micropigmentação Shadow Makeup",
+            description: "Procedimento que corrige falhas, realça o formato natural e proporciona mais definição e simetria ao olhar. O resultado é elegante, duradouro e personalizado, trazendo praticidade para o dia a dia e reduzindo a necessidade de maquiagem. Efeito Esfumado.",
+            price: "R$ 300,00",
+            duration: "1h a 2h",
+            maintenance: "1 a 2 anos",
+            image: "/servicos/micropigmentacao-shadow.webp"
+        },
+        {
+            id: 12,
+            title: "Micropigmentação Fio a Fio",
+            description: "Procedimento que corrige falhas, realça o formato natural e proporciona mais definição e simetria ao olhar. O resultado é elegante, duradouro e personalizado, trazendo praticidade para o dia a dia. A Fio a Fio imita fios naturais, mais indicado para quem tem poucas falhas para que o fio artístico se mescle ao fio natural.",
+            price: "R$ 300,00",
+            duration: "1h a 2h",
+            maintenance: "8 meses a 1 ano e meio",
+            image: "/servicos/micropigmentacao-fio-a-fio.webp"
+        },
     ];
 
     const [selectedService, setSelectedService] = useState<any>(null);
@@ -80,8 +129,8 @@ export default function LandingPage() {
         return groups;
     };
 
-    const mobileGroups = chunkServices(services, 1);  // 1 card por slide (< 768px)
-    const tabletGroups = chunkServices(services, 2);  // 2 cards por slide (768px a 991px)
+    const mobileGroups = chunkServices(services, 1);
+    const tabletGroups = chunkServices(services, 2);
     const desktopGroups = chunkServices(services, 3);
 
     const renderCarousel = (id: string, groups: any[][], colClass: string, wrapperClass: string) => (
