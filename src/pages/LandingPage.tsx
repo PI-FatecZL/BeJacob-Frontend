@@ -265,7 +265,19 @@ export default function LandingPage() {
                                     </div>
 
                                     <div className="carousel-item">
-                                        <img src="/galeria/img-galeria2.webp" alt="Resultado Labial 2" className="d-block w-100 h-100 object-fit-cover" />
+                                        <img src="/galeria/img-galeria1.webp" alt="Resultado Labial 2" className="d-block w-100 h-100 object-fit-cover" />
+                                    </div>
+
+                                    <div className="carousel-item">
+                                        <img src="/galeria/img-galeria1.webp" alt="Resultado Labial 2" className="d-block w-100 h-100 object-fit-cover" />
+                                    </div>
+
+                                    <div className="carousel-item">
+                                        <img src="/galeria/img-galeria1.webp" alt="Resultado Labial 2" className="d-block w-100 h-100 object-fit-cover" />
+                                    </div>
+
+                                    <div className="carousel-item">
+                                        <img src="/galeria/img-galeria1.webp" alt="Resultado Labial 2" className="d-block w-100 h-100 object-fit-cover" />
                                     </div>
                                 </div>
                             </div>
@@ -277,11 +289,23 @@ export default function LandingPage() {
                                     <div id="carrosselDireitoSuperior" className="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="10000">
                                         <div className="carousel-inner ratio ratio-21x9 overflow-hidden rounded-4 shadow-sm">
                                             <div className="carousel-item active">
-                                                <img src="/galeria/img-galeria3.webp" alt="Sobrancelhas 1" className="d-block w-100 h-100 object-fit-cover" />
+                                                <img src="/galeria/img-galeria2.webp" alt="Resultado Labial 1" className="d-block w-100 h-100 object-fit-cover" />
                                             </div>
 
                                             <div className="carousel-item">
-                                                <img src="/galeria/img-galeria4.webp" alt="Sobrancelhas 2" className="d-block w-100 h-100 object-fit-cover" />
+                                                <img src="/galeria/img-galeria2.webp" alt="Resultado Labial 2" className="d-block w-100 h-100 object-fit-cover" />
+                                            </div>
+
+                                            <div className="carousel-item">
+                                                <img src="/galeria/img-galeria2.webp" alt="Resultado Labial 2" className="d-block w-100 h-100 object-fit-cover" />
+                                            </div>
+
+                                            <div className="carousel-item">
+                                                <img src="/galeria/img-galeria2.webp" alt="Resultado Labial 2" className="d-block w-100 h-100 object-fit-cover" />
+                                            </div>
+
+                                            <div className="carousel-item">
+                                                <img src="/galeria/img-galeria2.webp" alt="Resultado Labial 2" className="d-block w-100 h-100 object-fit-cover" />
                                             </div>
                                         </div>
                                     </div>
@@ -291,11 +315,23 @@ export default function LandingPage() {
                                     <div id="carrosselDireitoInferior" className="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="10000">
                                         <div className="carousel-inner ratio ratio-21x9 overflow-hidden rounded-4 shadow-sm">
                                             <div className="carousel-item active">
-                                                <img src="/galeria/img-galeria2.webp" alt="Estética Facial 1" className="d-block w-100 h-100 object-fit-cover" />
+                                                <img src="/galeria/img-galeria3.webp" alt="Resultado Labial 1" className="d-block w-100 h-100 object-fit-cover" />
                                             </div>
 
                                             <div className="carousel-item">
-                                                <img src="/galeria/img-galeria1.webp" alt="Estética Facial 2" className="d-block w-100 h-100 object-fit-cover" />
+                                                <img src="/galeria/img-galeria3.webp" alt="Resultado Labial 2" className="d-block w-100 h-100 object-fit-cover" />
+                                            </div>
+
+                                            <div className="carousel-item">
+                                                <img src="/galeria/img-galeria3.webp" alt="Resultado Labial 2" className="d-block w-100 h-100 object-fit-cover" />
+                                            </div>
+
+                                            <div className="carousel-item">
+                                                <img src="/galeria/img-galeria3.webp" alt="Resultado Labial 2" className="d-block w-100 h-100 object-fit-cover" />
+                                            </div>
+
+                                            <div className="carousel-item">
+                                                <img src="/galeria/img-galeria3.webp" alt="Resultado Labial 2" className="d-block w-100 h-100 object-fit-cover" />
                                             </div>
                                         </div>
                                     </div>
@@ -364,7 +400,7 @@ export default function LandingPage() {
                                 <div className="p-2 p-sm-3 bg-light border rounded-3 h-100 d-flex flex-column justify-content-center align-items-center">
                                     <i className="bi bi-tag text-success fs-5 mb-1"></i>
                                     <span className="text-muted text-uppercase fw-semibold" style={{ fontSize: "0.65rem", letterSpacing: "0.5px" }}>
-                                        Investimento
+                                        Valor
                                     </span>
                                     <span className="fw-bold text-dark small mt-1">
                                         {selectedService.price || "Sob consulta"}
